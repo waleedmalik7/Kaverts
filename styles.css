@@ -1,0 +1,25 @@
+body {
+    background: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* This centers the form vertically on the page. */
+    margin: 0;
+}
+form {
+    max-width: 200px;
+    background: white;
+    padding: 10px;
+}
+input{
+    display: block;
+    margin: 10px;
+    padding: 4px;
+}
+.login-form {
+    text-align: center; /* Center the form content horizontally. */
+}
+.submit {
+    margin: 0 auto; /* Center the submit button horizontally within the form. */
+    display: block;
+}
