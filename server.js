@@ -4,10 +4,11 @@ const http = require("http")
 const session = require('express-session')
 const port = 80
 const { Pool } = require('pg')
-
+const bycrypt = require('bcrypt')
+const saltRounds = 2
 const pool = new Pool({
     user: 'ws_login',
-    host: '127.0.0.1',
+    host: 'localhost',
     database: 'Kaverts',
     password: 'mt3sBf35.#tM',
     port: 5432,
@@ -27,39 +28,29 @@ app.use(session({
     saveUninitialized: false
 }))
 
+ 
 
+app.post("/login", async (req, res) => {
+    let email = req.body.email
+    let pw = req.body.password
+    if (email && pw) {
+        run_query("SELECT pw_hash FROM student WHERE email = $1;", [email], async (result)=> {
+            if (result.rows.length && await bycrypt.compare(result.rows[0].pw_hash, await bycrypt.hash(pw, saltRounds))) {
+                req.session.authenticated = true
+                res.redirect("/")
+            }
+            else {
+                res.render("login.ejs", {
+                    prompt: "INVALID LOGIN"
+                })  
+            }
+        })
 
-app.post("/", (req, res, next) => {
-    let username = req.body.username
-    let password = req.body.password
-    if (username && password) {
-        try {
-            con.connect( ()=> {
-                sqlQuery = "SELECT if ( (SELECT CONCAT('*', UPPER(SHA1(UNHEX(SHA1(?)))))) = " +
-                    "(SELECT authentication_string FROM mysql.user WHERE user = ?),true, false) as authenticated"
-                sqlParams = [password, username]
-                con.query(sqlQuery, sqlParams, (error, result, fields) => {
-                    if (result[0].authenticated) {
-                        req.session.authenticated = true
-                        res.redirect("/")
-                    }
-                    else {
-                        res.render("login.ejs", {
-                            prompt: "INVALID LOGIN"
-                        })  
-                    }
-                })
-            })
-        }
-        catch (error) {
-            next(error)
-        }
     }
 })
 
 
-app.get("/", (req, res) => {
-    console.log(pool.query('SELECT * FROM student'))
+app.get("/login", async (req, res) => {
     if (req.session.authenticated) {
         req.session.authenticated = false
         res.redirect("/")
@@ -69,6 +60,15 @@ app.get("/", (req, res) => {
         })
     }
 })
+
+async function run_query(query, params, callback){
+    try {
+        const result = await pool.query(query, params);
+        callback(result)
+      } catch (error) {
+        console.error('Error executing query:', error);
+      }
+}
 
 http.createServer(app).listen(port, () => {
     console.log("listening on port: " + port)  

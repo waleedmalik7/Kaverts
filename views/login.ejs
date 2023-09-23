@@ -11,13 +11,14 @@
     <body>
         
         <div class="login-container">
-            <form class="login-form">
+            <form class="login-form" action = "/login" method = "POST">
                 <div class="img-container">
                     <img src="images/Company.png" alt="Company Logo">
                 </div>
-                <input name="username" type="text" id="username" placeholder="Email" autocomplete="off">
+                <input name="email" type="text" id="email" placeholder="Email" autocomplete="off">
                 <input name="password" type="password" id="password" placeholder="Password">
                 <input class="submit" type="submit" value="submit">
+                <label> &emsp; <%-prompt %> </label>
             </form>
         </div>
 
