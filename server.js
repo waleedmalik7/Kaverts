@@ -5,7 +5,8 @@ const session = require('express-session')
 const port = 80
 const { Pool } = require('pg')
 const bycrypt = require('bcrypt')
-const saltRounds = 2
+const emailValidator = require('email-validator');
+const saltRounds = 4
 const pool = new Pool({
     user: 'ws_login',
     host: 'localhost',
@@ -35,14 +36,15 @@ app.post("/login", async (req, res) => {
     let pw = req.body.password
     if (email && pw) {
         run_query("SELECT pw_hash FROM student WHERE email = $1;", [email], async (result)=> {
-            if (result.rows.length && await bycrypt.compare(result.rows[0].pw_hash, await bycrypt.hash(pw, saltRounds))) {
+            if (result.rows.length && await bycrypt.compare(pw, result.rows[0].pw_hash)) {
                 req.session.authenticated = true
                 res.redirect("/")
             }
             else {
                 res.render("login.ejs", {
-                    prompt: "INVALID LOGIN"
-                })  
+                    prompt: "INCORRECT EMAIL/PASSWORD",
+                    prevEmail: email
+                })
             }
         })
 
@@ -56,12 +58,45 @@ app.get("/login", async (req, res) => {
         res.redirect("/")
     } else {
         res.render("login.ejs", {
-            prompt: ""
+            prompt: "",
+            prevEmail: ""
         })
     }
 })
 
-async function run_query(query, params, callback){
+app.get("/signup", async (req, res) => {
+    if (req.session.authenticated) {
+        req.session.authenticated = false
+        res.redirect("/")
+    } else {
+        res.render("sign-up.ejs", {
+            prompt: "",
+            prevFName: "",
+            prevLName: "",
+            prevPassword: "",
+        })
+    }
+})
+
+app.post("/signup", async (req, res) => {
+    let pw = req.body.password
+    let fName = req.body.fName
+    let lName = req.body.lName
+    let email = req.body.email
+    if (await emailValidator.validate(email)) {
+        sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4);"
+        run_query(sql_query, [fName, lName, email, await bycrypt.hash(pw, saltRounds)], async (result)=> {
+            if (result.error) {
+            } else {
+            }
+        })
+    } else {
+        //email is not valid
+    }
+
+})
+
+async function run_query(query, params, callback){ 
     try {
         const result = await pool.query(query, params);
         callback(result)
