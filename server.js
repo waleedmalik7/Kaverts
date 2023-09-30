@@ -5,8 +5,11 @@ const session = require('express-session')
 const port = 80
 const { Pool } = require('pg')
 const bycrypt = require('bcrypt')
-const emailValidator = require('email-validator');
 const saltRounds = 4
+const emailValidator = require('email-validator');
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const jwtKey = "vUL8qmXMqKwSSqUP_O_MRoYNd2taqRnumPc7UhgtX6jAjtgvsni02dbFEC7OlbMjyipUqQHpuzS9opSxZDTN9hiiPI3n_l7-Wo0dTysDLKtXndAvrsxTzkM0y9lk5mAoay9OT9jgJ54v0T8rtjVY4YwkctOO8bciVu_uvu_t_G0"
 const pool = new Pool({
     user: 'ws_login',
     host: 'localhost',
@@ -29,7 +32,15 @@ app.use(session({
     saveUninitialized: false
 }))
 
- 
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: "kaverts.emailer@gmail.com",
+        pass: "qoipqcnipdzczkaa"
+    }
+});
 
 app.post("/login", async (req, res) => {
     let email = req.body.email
@@ -87,7 +98,28 @@ app.post("/signup", async (req, res) => {
         sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4);"
         run_query(sql_query, [fName, lName, email, await bycrypt.hash(pw, saltRounds)], async (result)=> {
             if (result.error) {
+                if (result.error.code == '23505') {
+                    res.render("sign-up.ejs")
+                }
             } else {
+                let token = jwt.sign({data: email}, jwtKey, { expiresIn: '10m' } ); 
+                let mailConfig = {
+                    from: "kaverts.emailer@gmail.com",
+                    to: email,
+                    subject: 'Email Verification',
+                    text:  `Hi, thank you for using our platform. Please follow the given link to verify your email 
+http://localhost:${port}/verify/${token}. 
+Hope you enjoy!` 
+                };
+                transporter.sendMail(mailConfig, (err) => {
+                    if (err) {
+                        console.log(err)
+                    }
+                    else {
+                        // res.render("waitEmailConfirm.ejs")
+                    }
+                })
+
             }
         })
     } else {
@@ -96,6 +128,24 @@ app.post("/signup", async (req, res) => {
 
 })
 
+app.get("/verify/:token", async(req, res) => {
+    let token = req.params.token
+    jwt.verify(token, jwtKey, (err, decoded) => {
+        if (err) {
+            console.log(err)
+        } else {
+            run_query("UPDATE student SET active = True WHERE email = $1", [decoded.data], async(result) => {
+                if (result.error) {
+                    console.log(result.error)
+                } else {
+                    // res.render("main", {
+                    //     id: ""
+                    // })
+                }
+            })
+        }
+    })
+})
 async function run_query(query, params, callback){ 
     try {
         const result = await pool.query(query, params);
