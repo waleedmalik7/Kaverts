@@ -1,0 +1,89 @@
+.sign-up-container{
+    background: #cef2fd65;
+    display: flex;
+    justify-content: center;
+    height: 100vh; /* This centers the form vertically on the page. */
+    margin: 0;
+    min-width: 800px;
+}
+.sign-up-form {
+    background: #cef2fd;
+    min-width: 800px;
+    padding: 20px;
+    text-align: center;
+    border-radius: 50px;
+}
+.back{
+    font-family:'Arial';
+    cursor: pointer;
+    text-align: left;
+}
+.header{
+    font-family: 'Calibri';
+    background-color: #8ccde062; /* Add a background color to create a "box" effect */
+    padding: 10px 20px; /* Add padding to create space around the text */
+    border-radius: 20px;
+    display: inline-block;
+}
+
+input[type="text"],
+input[type="password"]{
+    width: 300px;
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    font-family: 'Calibri';
+}
+input[type="text"].success,
+input[type="password"].success{
+    outline: 2px solid rgb(32, 189, 32);
+    background-color: rgba(0, 255, 0, 0.212);
+}
+input[type="text"].fail,
+input[type="password"].fail{
+    outline: 2px solid rgb(230, 38, 38);
+    background-color: rgba(255, 0, 0, 0.281);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: 1px dashed #3498db; /* Change the color and style of the outline on focus */
+    transform: scale(1.03);
+}
+
+input[type="checkbox"]{
+    margin: 0 auto 20px;
+    padding: 7px 20px;
+    cursor: pointer;
+}
+
+
+.checkbox-label{
+    font-family: 'Calibri';
+    cursor: pointer;
+}
+
+.submit{
+    margin: 0 auto; /* Center the submit button horizontally within the form. */
+    width: 80px;
+    height: 30px;
+    display: block;
+    border: none;
+    outline: none;
+    background: #2e11d3;
+    color:#fff ;
+    font-size: 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: 'Calibri';
+}
+.submit:hover{
+    transform: scale(1.03);
+    background-color: #472fcc;
+    color:#d3d3d3;
+    font-weight: bold;
+}
