@@ -16,6 +16,8 @@ const checkbox = document.querySelector(".checkbox");
 //Non database checks: 
 form.addEventListener('submit', (e)=>{
     e.preventDefault(); //stops refresh
+    console.log("Over here boss")
+    form.submit();
 });
 
 function validateAndSetClass(element, regex){

@@ -62,7 +62,6 @@ app.post("/login", async (req, res) => {
     }
 })
 
-
 app.get("/login", async (req, res) => {
     if (req.session.authenticated) {
         req.session.authenticated = false
@@ -82,50 +81,76 @@ app.get("/signup", async (req, res) => {
     } else {
         res.render("sign-up.ejs", {
             prompt: "",
-            prevFName: "",
-            prevLName: "",
-            prevPassword: "",
+            prevEmail: "",
+            prevName: ""
         })
-    }
+    }  
 })
 
 app.post("/signup", async (req, res) => {
     let pw = req.body.password
-    let fName = req.body.fName
-    let lName = req.body.lName
-    let email = req.body.email
+    let name = req.body.name.split(" ", 2)
+    let email = req.body.username
     if (await emailValidator.validate(email)) {
         sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4);"
-        run_query(sql_query, [fName, lName, email, await bycrypt.hash(pw, saltRounds)], async (result)=> {
-            if (result.error) {
-                if (result.error.code == '23505') {
-                    res.render("sign-up.ejs")
-                }
-            } else {
-                let token = jwt.sign({data: email}, jwtKey, { expiresIn: '10m' } ); 
-                let mailConfig = {
-                    from: "kaverts.emailer@gmail.com",
-                    to: email,
-                    subject: 'Email Verification',
-                    text:  `Hi, thank you for using our platform. Please follow the given link to verify your email 
+        run_query(sql_query, [name[0], name[1], email, await bycrypt.hash(pw, saltRounds)], async (result)=> {
+            let token = jwt.sign({data: email}, jwtKey, { expiresIn: '10m' } ); 
+            let mailConfig = {
+                from: "kaverts.emailer@gmail.com",
+                to: email,
+                subject: 'Email Verification',
+                text:  `Hi, thank you for using our platform. Please follow the given link to verify your email 
 http://localhost:${port}/verify/${token}. 
 Hope you enjoy!` 
-                };
-                transporter.sendMail(mailConfig, (err) => {
-                    if (err) {
-                        console.log(err)
-                    }
-                    else {
-                        // res.render("waitEmailConfirm.ejs")
-                    }
+            };
+            transporter.sendMail(mailConfig, (err) => {
+                if (err) {
+                    console.log(err)
+                }
+                else {
+                    req.session.user = email
+                    req.session.userActive = false
+                    res.redirect("/")
+                }
+            })
+        }, async (sqlError) => {
+            if (sqlError.code == '23505') {
+                res.render("sign-up.ejs", {     
+                    prompt: "That email has already been used",
+                    prevEmail: "",
+                    prevName: req.body.name
                 })
-
+            } else {
+                console.log(sqlError)
             }
         })
     } else {
-        //email is not valid
+        res.render("sign-up.ejs", {     
+            prompt: "Please enter a valid email",
+            prevName: req.body.name
+        })
     }
 
+})
+
+app.post("/resend", async(req, res) => {
+    let token = jwt.sign({data: req.body.email}, jwtKey, { expiresIn: '10m' } ); 
+    let mailConfig = {
+        from: "kaverts.emailer@gmail.com",
+        to: req.body.email,
+        subject: 'Email Verification',
+        text:  `Hi, thank you for using our platform. Please follow the given link to verify your email 
+http://localhost:${port}/verify/${token}. 
+Hope you enjoy!` 
+    };
+    transporter.sendMail(mailConfig, (err) => {
+        if (err) {
+            console.log(err)
+        }
+        else {
+            res.redirect("/")
+        }
+    }) 
 })
 
 app.get("/verify/:token", async(req, res) => {
@@ -135,24 +160,40 @@ app.get("/verify/:token", async(req, res) => {
             console.log(err)
         } else {
             run_query("UPDATE student SET active = True WHERE email = $1", [decoded.data], async(result) => {
-                if (result.error) {
-                    console.log(result.error)
-                } else {
-                    // res.render("main", {
-                    //     id: ""
-                    // })
-                }
+                req.session.user = decoded.data
+                req.session.userActive = true
+                res.redirect("/")
+            }, async(sqlError) => {
+                console.log(sqlError)
             })
         }
     })
 })
-async function run_query(query, params, callback){ 
+
+app.get("/", async(req, res) => {
+    if (req.session.user) {
+        if (req.session.userActive) {
+            res.send("Main page")
+        } else {
+            res.render("waitEmailConfirm.ejs", {
+                prevEmail: req.session.user
+            })
+        }
+    } else {
+        res.render("login.ejs", {
+            prompt: "",
+            prevEmail: ""
+        })
+    }
+})
+
+async function run_query(query, params, callback, errHandle){ 
     try {
         const result = await pool.query(query, params);
         callback(result)
-      } catch (error) {
-        console.error('Error executing query:', error);
-      }
+    } catch (error) {
+        errHandle(error)
+    }
 }
 
 http.createServer(app).listen(port, () => {
