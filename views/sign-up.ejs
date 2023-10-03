@@ -10,7 +10,7 @@
 <body>
     <div class="sign-up-container">
         
-        <form class="sign-up-form">
+        <form class="sign-up-form" action="/signup" method="POST">
             <div class="back">X</div>
             <div class="img-container">
                 <img src="images/Company.png" alt="Company Logo">
@@ -19,13 +19,14 @@
                 <h2 class="header">Join Us Now</h2>
             </div>
             
-            <input name="name" type="text" id="full-name" placeholder="Full Name" autocomplete="off" required>
-            <input name="username" type="text" id="username" placeholder="Email" autocomplete="off" required>
-            <input name="password" type="password" id="password" placeholder="Password" required>
-            <input name="confirm-password" type="password" id="confirm-password" placeholder="Confirm Password" required>
-            <input type="checkbox" id="terms" name="terms" class="checkbox" required>
+            <input name="name" type="text" id="full-name" placeholder="Full Name" autocomplete="off" value=<%-prevName%>>
+            <input name="username" type="text" id="username" placeholder="Email" autocomplete="off" value=<%-prevEmail%>>
+            <input name="password" type="password" id="password" placeholder="Password">
+            <input name="confirm-password" type="password" id="confirm-password" placeholder="Confirm Password">
+            <input type="checkbox" id="terms" name="terms" class="checkbox">
             <label for="terms" class="checkbox-label">I agree to the Terms and Conditions</label>
             <input class="submit" type="submit" value="Join">
+            <label> &emsp; <%-prompt %> </label>
         </form>
     </div>
     <script src="sign-up.js"></script>
