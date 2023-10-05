@@ -8,6 +8,11 @@
     <title>Kaverts - Sign Up</title>
 </head>
 <body>
+    <header>
+        <a href="/login">
+            <button id="sign-out" > Log In </button>
+         </a>
+    </header>
     <div class="sign-up-container">
         
         <form class="sign-up-form" action="/signup" method="POST">
@@ -26,7 +31,7 @@
             <input type="checkbox" id="terms" name="terms" class="checkbox">
             <label for="terms" class="checkbox-label">I agree to the Terms and Conditions</label>
             <input class="submit" type="submit" value="Join">
-            <label> &emsp; <%-prompt %> </label>
+            <label> &emsp; <%-prompt%> </label>
         </form>
     </div>
     <script src="sign-up.js"></script>

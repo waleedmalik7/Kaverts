@@ -1,0 +1,73 @@
+body {
+    margin: 0;
+    background-color: #cef2fd65;
+}
+
+#sign-out {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#home-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 110px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#profile-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    height: 30px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    margin: 0;
+}
+
+header {
+    height: 40px;
+    position: relative;
+}
+
+#post-container{
+    background: #cef2fd65;
+    display: flex;
+    justify-content: center;
+    height: 100vh; /* This centers the form vertically on the page. */
+    margin: 0;
+    min-width: 800px;
+}
+
+#description{
+    display: block;
+    margin: 12px auto;
+    padding: 7px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    font-family: 'Calibri';
+}
+.copyright{
+    font-size: 12px;
+    font-family: Arial;
+    text-align: center;
+    font-weight: bold;
+    padding: 1px;
+}

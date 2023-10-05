@@ -1,3 +1,11 @@
+#sign-out {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
 .login-container{
     background: #cef2fd65;
     display: flex;
