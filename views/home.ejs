@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <title>Kaverts</title>
+        <meta name="viewport" content="width=device-width">
+        <meta charset="utf-8">
+        <link href="home.css" rel="stylesheet">
+        <link rel="icon" href="images/Logo.png">
+    </head>
+
+    <body>
+        <header>
+            <a href = "/"> 
+                <button id="home-button" > Home </button></a>
+            <a href="/signout">
+                <button id="sign-out" > Sign Out </button>
+            </a>
+
+            <a href="/profile">
+                <button id="profile-button" > Profile </button>
+            </href>
+        </header>
+        <div class="post-container">
+            <form class="question-form" action = "/question" method = "POST">
+                <input name="description" type="textarea" id="description" 
+                 rows = "6" cols = "50" placeholder="Please enter a description of the question:">
+                <input class="submit" type="submit" value="POST QUESTION">
+            </form>
+        </div>
+        <footer>
+            <p class="copyright">Copyright 2023 Kaverts &copy;</p>
+        </footer>
+    </body>
+
+</html>

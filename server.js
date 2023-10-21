@@ -24,7 +24,7 @@ app.set('view engine', 'ejs')
 app.use(express.static("public"))
 app.use(express.urlencoded({ extended: true}))
 
-
+// Session is used to store user info
 app.use(session({
     secret: "Jb0FVuOuTz",
     cookie: {maxAge: 2*24*60*60*1000},
@@ -32,6 +32,7 @@ app.use(session({
     saveUninitialized: false
 }))
 
+// Transporter is used to send mail to users
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -45,7 +46,7 @@ const transporter = nodemailer.createTransport({
 app.post("/login", async (req, res) => {
     let email = req.body.email
     let pw = req.body.password
-    if (email && pw) {
+    if (email && pw) { // If user entered email and password, check if hashed password matches DB
         run_query("SELECT pw_hash FROM student WHERE email = $1;", [email], async (result)=> {
             if (result.rows.length && await bycrypt.compare(pw, result.rows[0].pw_hash)) {
                 req.session.authenticated = true
@@ -91,9 +92,10 @@ app.post("/signup", async (req, res) => {
     let pw = req.body.password
     let name = req.body.name.split(" ", 2)
     let email = req.body.username
-    if (await emailValidator.validate(email)) {
+    if (await emailValidator.validate(email)) { // Check if email exists
         sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4);"
-        run_query(sql_query, [name[0], name[1], email, await bycrypt.hash(pw, saltRounds)], async (result)=> {
+        run_query(sql_query, [name[0], name[1], email, await bycrypt.hash(pw, saltRounds)], async => {
+            // Craft email to send to user
             let token = jwt.sign({data: email}, jwtKey, { expiresIn: '10m' } ); 
             let mailConfig = {
                 from: "kaverts.emailer@gmail.com",
@@ -103,6 +105,7 @@ app.post("/signup", async (req, res) => {
 http://localhost:${port}/verify/${token}. 
 Hope you enjoy!` 
             };
+            // Send email to user
             transporter.sendMail(mailConfig, (err) => {
                 if (err) {
                     console.log(err)
@@ -114,6 +117,7 @@ Hope you enjoy!`
                 }
             })
         }, async (sqlError) => {
+            // Duplicate email
             if (sqlError.code == '23505') {
                 res.render("sign-up.ejs", {     
                     prompt: "That email has already been used",
@@ -134,6 +138,7 @@ Hope you enjoy!`
 })
 
 app.post("/resend", async(req, res) => {
+    // If client requests new email with confirmation link
     let token = jwt.sign({data: req.body.email}, jwtKey, { expiresIn: '10m' } ); 
     let mailConfig = {
         from: "kaverts.emailer@gmail.com",
@@ -154,6 +159,7 @@ Hope you enjoy!`
 })
 
 app.get("/verify/:token", async(req, res) => {
+    // Verifies email belongs to user
     let token = req.params.token
     jwt.verify(token, jwtKey, (err, decoded) => {
         if (err) {
@@ -171,22 +177,26 @@ app.get("/verify/:token", async(req, res) => {
 })
 
 app.get("/", async(req, res) => {
-    if (req.session.user) {
-        if (req.session.userActive) {
-            res.send("Main page")
+    if (!req.session.user) {
+        if (!req.session.userActive) {
+            res.render("home.ejs")
         } else {
             res.render("waitEmailConfirm.ejs", {
                 prevEmail: req.session.user
             })
         }
     } else {
-        res.render("login.ejs", {
-            prompt: "",
-            prevEmail: ""
-        })
+        res.send("Main page")
     }
 })
 
+app.get("/signout", async(req, res) => {
+    req.session.user = 0
+    req.session.activeUser = false
+    res.redirect("/")
+})
+
+// Asynchronously runs a Postgresql query
 async function run_query(query, params, callback, errHandle){ 
     try {
         const result = await pool.query(query, params);
