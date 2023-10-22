@@ -14,7 +14,7 @@
     height: 100vh; /* This centers the form vertically on the page. */
     margin: 0;
 }
-.login-form {
+#login-form {
     background: #cef2fd;
     padding: 20px;
     text-align: center;

@@ -62,7 +62,7 @@ app.post("/active", (req, res) => {
             tutorID = req.body.tutorId
             activeTutors.tutorID = new ActiveTutor(tutorID, quals)
             res.sendStatus(200)
-        } else {
+        } else { 
             res.status(303).send("Please add qualifications.")
         }
     })
