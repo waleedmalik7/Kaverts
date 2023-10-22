@@ -49,7 +49,7 @@ app.post("/login", async (req, res) => {
     if (email && pw) { // If user entered email and password, check if hashed password matches DB
         run_query("SELECT pw_hash FROM student WHERE email = $1;", [email], async (result)=> {
             if (result.rows.length && await bycrypt.compare(pw, result.rows[0].pw_hash)) {
-                req.session.authenticated = true
+                req.session.user = email
                 res.redirect("/")
             }
             else {
@@ -64,8 +64,8 @@ app.post("/login", async (req, res) => {
 })
 
 app.get("/login", async (req, res) => {
-    if (req.session.authenticated) {
-        req.session.authenticated = false
+    if (req.session.user) {
+        req.session.user = null
         res.redirect("/")
     } else {
         res.render("login.ejs", {
@@ -76,8 +76,8 @@ app.get("/login", async (req, res) => {
 })
 
 app.get("/signup", async (req, res) => {
-    if (req.session.authenticated) {
-        req.session.authenticated = false
+    if (req.session.user) {
+        req.session.user = null
         res.redirect("/")
     } else {
         res.render("sign-up.ejs", {
@@ -93,8 +93,8 @@ app.post("/signup", async (req, res) => {
     let name = req.body.name.split(" ", 2)
     let email = req.body.username
     if (await emailValidator.validate(email)) { // Check if email exists
-        sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4);"
-        run_query(sql_query, [name[0], name[1], email, await bycrypt.hash(pw, saltRounds)], async => {
+         sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4) RETURNING id;"
+        run_query(sql_query, [name[0], name[1], email, await bycrypt.hash(pw, saltRounds)], async(result) => {
             // Craft email to send to user
             let token = jwt.sign({data: email}, jwtKey, { expiresIn: '10m' } ); 
             let mailConfig = {
@@ -138,6 +138,7 @@ Hope you enjoy!`
 })
 
 app.post("/resend", async(req, res) => {
+    console.log(req.body)
     // If client requests new email with confirmation link
     let token = jwt.sign({data: req.body.email}, jwtKey, { expiresIn: '10m' } ); 
     let mailConfig = {
@@ -151,9 +152,10 @@ Hope you enjoy!`
     transporter.sendMail(mailConfig, (err) => {
         if (err) {
             console.log(err)
+            res.sendStatus(500)
         }
         else {
-            res.redirect("/")
+            res.sendStatus(200)
         }
     }) 
 })
@@ -177,8 +179,8 @@ app.get("/verify/:token", async(req, res) => {
 })
 
 app.get("/", async(req, res) => {
-    if (!req.session.user) {
-        if (!req.session.userActive) {
+    if (req.session.user) {
+        if (req.session.userActive) {
             res.render("home.ejs")
         } else {
             res.render("waitEmailConfirm.ejs", {
@@ -191,7 +193,7 @@ app.get("/", async(req, res) => {
 })
 
 app.get("/signout", async(req, res) => {
-    req.session.user = 0
+    req.session.user = null 
     req.session.activeUser = false
     res.redirect("/")
 })
