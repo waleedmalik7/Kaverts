@@ -47,9 +47,10 @@ app.post("/login", async (req, res) => {
     let email = req.body.email
     let pw = req.body.password
     if (email && pw) { // If user entered email and password, check if hashed password matches DB
-        run_query("SELECT pw_hash FROM student WHERE email = $1;", [email], async (result)=> {
+        run_query("SELECT pw_hash, active FROM student WHERE email = $1;", [email], async (result)=> {
             if (result.rows.length && await bycrypt.compare(pw, result.rows[0].pw_hash)) {
                 req.session.user = email
+                req.session.userActive = result.rows[0].active
                 res.redirect("/")
             }
             else {
