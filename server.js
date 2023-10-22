@@ -196,7 +196,7 @@ app.get("/", async(req, res) => {
 app.get("/signout", async(req, res) => {
     req.session.user = null 
     req.session.activeUser = false
-    res.redirect("/")
+    res.redirect("/login")
 })
 
 // Asynchronously runs a Postgresql query

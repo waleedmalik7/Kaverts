@@ -21,10 +21,9 @@ const information = [
 form.addEventListener('submit', (e)=>{
     e.preventDefault(); //stops refresh
     if(checkbox.checked && submittable()){
-        alert('Form submitted successfully');
         form.submit();
     }else{
-        alert('Form is invalid');
+        alert('Form is invalid'); //return why it is invalid
     }
 });
 
