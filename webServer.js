@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const ejs = require('ejs');
 const http = require("http")
 const session = require('express-session')
 const port = 80
@@ -90,49 +91,58 @@ app.get("/signup", async (req, res) => {
 })
 
 app.post("/signup", async (req, res) => {
-    let pw = req.body.password
-    let name = req.body.name.split(" ", 2)
-    let email = req.body.username
-    if (await emailValidator.validate(email)) { // Check if email exists
-         sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4) RETURNING id;"
-        run_query(sql_query, [name[0], name[1], email, await bycrypt.hash(pw, saltRounds)], async(result) => {
-            // Craft email to send to user
-            let token = jwt.sign({data: email}, jwtKey, { expiresIn: '10m' } ); 
-            let mailConfig = {
-                from: "kaverts.emailer@gmail.com",
-                to: email,
-                subject: 'Email Verification',
-                text:  `Hi, thank you for using our platform. Please follow the given link to verify your email 
-http://localhost:${port}/verify/${token}. 
-Hope you enjoy!` 
-            };
-            // Send email to user
-            transporter.sendMail(mailConfig, (err) => {
-                if (err) {
-                    console.log(err)
-                }
-                else {
-                    req.session.user = email
-                    req.session.userActive = false
-                    res.redirect("/")
+    if (req.body.name && req.body.password && req.body.username) {
+        let pw = req.body.password
+        let name = req.body.name.split(" ", 2)
+        let email = req.body.username
+        if (await emailValidator.validate(email)) { // Check if email exists
+            sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4) RETURNING id;"
+            run_query(sql_query, [name[0], name[1], email, await bycrypt.hash(pw, saltRounds)], async(result) => {
+                // Craft email to send to user
+                let token = jwt.sign({data: email}, jwtKey, { expiresIn: '10m' } ); 
+                let mailConfig = {
+                    from: "kaverts.emailer@gmail.com",
+                    to: email,
+                    subject: 'Email Verification for Kaverts',
+                    html:  `<p> Hi, thank you for using our platform. Please follow the given link to verify your email  </p>
+                        <p> ` + `http://localhost:${port}/verify/${token}` + `</p>
+                        <p> Hope you enjoy! </p>`
+                };
+                // Send email to user
+                transporter.sendMail(mailConfig, (err) => {
+                    if (err) {
+                        console.log(err)
+                    }
+                    else {
+                        req.session.user = email
+                        req.session.userActive = false
+                        res.redirect("/")
+                    }
+                })
+            }, async (sqlError) => {
+                // Duplicate email
+                if (sqlError.code == '23505') {
+                    res.render("sign-up.ejs", {     
+                        prompt: "That email has already been used",
+                        prevEmail: "",
+                        prevName: req.body.name
+                    })
+                } else {
+                    console.log(sqlError)
                 }
             })
-        }, async (sqlError) => {
-            // Duplicate email
-            if (sqlError.code == '23505') {
-                res.render("sign-up.ejs", {     
-                    prompt: "That email has already been used",
-                    prevEmail: "",
-                    prevName: req.body.name
-                })
-            } else {
-                console.log(sqlError)
-            }
-        })
+        } else {
+            res.render("sign-up.ejs", {     
+                prompt: "Please enter a valid email",
+                prevName: req.body.name,
+                prevEmail: ""
+            })
+        }
     } else {
         res.render("sign-up.ejs", {     
-            prompt: "Please enter a valid email",
-            prevName: req.body.name
+            prompt: "Sorry, something failed. Please try again",
+            prevName: "",
+            prevEmail: ""
         })
     }
 
