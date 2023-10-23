@@ -1,3 +1,6 @@
+header{
+    background: #cef2fd65;
+}
 #sign-out {
     font-family: 'Oswald', sans-serif;
     background: black;
@@ -20,11 +23,6 @@
     padding: 20px;
     text-align: center;
     border-radius: 50px;
-}
-.back{
-    font-family:'Arial';
-    cursor: pointer;
-    text-align: left;
 }
 .header{
     font-family: 'Calibri';

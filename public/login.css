@@ -10,7 +10,11 @@
     background: #cef2fd;
     padding: 20px;
     text-align: center;
+    width: 650px;
     border-radius: 50px;
+}
+.response{
+    text-align: center;
 }
 input[type="text"],
 input[type="password"]{
@@ -24,7 +28,7 @@ input[type="password"]{
     font-family: 'Calibri';
 }
 .submit {
-    margin: 0 auto; /* Center the submit button horizontally within the form. */
+    margin: 2px auto; /* Center the submit button horizontally within the form. */
     width: 80px;
     height: 30px;
     display: block;
@@ -49,7 +53,33 @@ input[type="password"]:focus {
     outline: 1px dashed #3498db; /* Change the color and style of the outline on focus */
     transform: scale(1.03);
 }
-
+.no-account{
+    margin: 2px auto;
+    padding-bottom: 2px;
+    width: 365px;
+    display: block;
+    color: white;
+    background: #2e11d3;
+    font-size: 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: 'Calibri';
+}
+.no-account:hover{
+    transform: scale(1.03);
+    background-color: #472fcc;
+    font-weight: bold;
+}
+a{
+    text-decoration: none;
+}
+a:visited{
+    color: white;
+    text-decoration: none;
+}
+a:hover{
+    color:#d3d3d3;
+}
 .copyright{
     font-size: 12px;
     font-family: Arial;

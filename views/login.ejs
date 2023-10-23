@@ -14,11 +14,11 @@
                 <div class="img-container">
                     <img src="images/Company.png" alt="Company Logo">
                 </div>
+                <label class="response"> <%-prompt %> </label> 
                 <input name="email" type="text" id="email" placeholder="Email" autocomplete="off" value=<%-prevEmail %>>
                 <input name="password" type="password" id="password" placeholder="Password">
                 <input class="submit" type="submit" value="Login">
-                <label> &emsp; <%-prompt %> </label> <br>
-                <p>  Don't have an account? <a href="/signup">Create one here </a> </p>
+                <p class="no-account"><a href="/signup">Don't have an account? Create one here</a></p>
             </form>
         </div>
 
