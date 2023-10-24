@@ -9,6 +9,7 @@ const bycrypt = require('bcrypt')
 const saltRounds = 4
 const emailValidator = require('email-validator');
 const nodemailer = require('nodemailer');
+const axios = require('axios')
 const jwt = require('jsonwebtoken');
 const jwtKey = "vUL8qmXMqKwSSqUP_O_MRoYNd2taqRnumPc7UhgtX6jAjtgvsni02dbFEC7OlbMjyipUqQHpuzS9opSxZDTN9hiiPI3n_l7-Wo0dTysDLKtXndAvrsxTzkM0y9lk5mAoay9OT9jgJ54v0T8rtjVY4YwkctOO8bciVu_uvu_t_G0"
 const pool = new Pool({
@@ -129,6 +130,7 @@ app.post("/signup", async (req, res) => {
                     })
                 } else {
                     console.log(sqlError)
+                    res.sendStatus(500)
                 }
             })
         } else {
@@ -149,16 +151,15 @@ app.post("/signup", async (req, res) => {
 })
 
 app.post("/resend", async(req, res) => {
-    console.log(req.body)
     // If client requests new email with confirmation link
     let token = jwt.sign({data: req.body.email}, jwtKey, { expiresIn: '10m' } ); 
     let mailConfig = {
         from: "kaverts.emailer@gmail.com",
-        to: req.body.email,
-        subject: 'Email Verification',
-        text:  `Hi, thank you for using our platform. Please follow the given link to verify your email 
-http://localhost:${port}/verify/${token}. 
-Hope you enjoy!` 
+        to:  req.body.email,
+        subject: 'Email Verification for Kaverts',
+        html:  `<p> Hi, thank you for using our platform. Please follow the given link to verify your email  </p>
+            <p> ` + `http://localhost:${port}/verify/${token}` + `</p>
+            <p> Hope you enjoy! </p>`
     };
     transporter.sendMail(mailConfig, (err) => {
         if (err) {
@@ -177,13 +178,12 @@ app.get("/verify/:token", async(req, res) => {
     jwt.verify(token, jwtKey, (err, decoded) => {
         if (err) {
             console.log(err)
+            res.sendStatus(500)
         } else {
             run_query("UPDATE student SET active = True WHERE email = $1", [decoded.data], async(result) => {
                 req.session.user = decoded.data
                 req.session.userActive = true
                 res.redirect("/")
-            }, async(sqlError) => {
-                console.log(sqlError)
             })
         }
     })
@@ -192,7 +192,9 @@ app.get("/verify/:token", async(req, res) => {
 app.get("/", async(req, res) => {
     if (req.session.user) {
         if (req.session.userActive) {
-            res.render("home.ejs")
+            res.render("home.ejs", {
+                prompt: ""
+            })
         } else {
             res.render("waitEmailConfirm.ejs", {
                 prevEmail: req.session.user
@@ -209,8 +211,32 @@ app.get("/signout", async(req, res) => {
     res.redirect("/login")
 })
 
+app.post("/question", async(req, res) => {
+    if (req.body.description, req.body.subject, req.body.grade) {
+        const form = {
+            studentEmail: req.session.user,
+            question: req.body.description,
+            subject: req.body.subject,
+            levelName: req.body.grade,
+        }
+        console.log(form)
+        axios.post('http://localhost:81/question', form, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        }).then((response) => {
+            res.sendStatus(200)
+        }).catch((error) => {
+            console.error(error);
+        });
+    } else {
+        res.render("home.ejs", {
+            prompt: "Uh oh, seems like you missed a spot."
+        })
+    }
+})
 // Asynchronously runs a Postgresql query
-async function run_query(query, params, callback, errHandle){ 
+async function run_query(query, params, callback, errHandle = (error)=> {console.log(error); res.sendStatus(404)}){ 
     try {
         const result = await pool.query(query, params);
         callback(result)

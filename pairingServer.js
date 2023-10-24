@@ -19,8 +19,10 @@ var activeTutors = {}
  * Student posts a question into the forum
  */
 app.post("/question", (req, res) => {
-    sqlInsert = "INSERT INTO question (student_id, prompt, subject, level, status) VALUES ($1, $2, $3, $4, False) RETURNING id;"
-    sqlParams = [req.body.student, req.body.question, req.body.subject, req.body.level]
+    console.log(req.body)
+    sqlInsert = `INSERT INTO question (student_id, prompt, subject, level, status) VALUES ((SELECT id FROM student WHERE email = $1),
+    $2,$3,(SELECT level FROM academic_level WHERE name = $4),False)RETURNING id;`
+    sqlParams = [req.body.studentEmail, req.body.question, req.body.subject, req.body.levelName]
     run_query(sqlInsert, sqlParams, (result) => {
         questionId = result.rows[0].id
         for (const [key, tutor] of Object.entries(activeTutors)) {
