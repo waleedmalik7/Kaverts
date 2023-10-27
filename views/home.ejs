@@ -16,7 +16,7 @@
         </header>
         <div class="post-container">
             
-            <form class="question-form" action = "/question" method = "POST">
+            <form id="question-form" method = "POST">
                 <div class="title-question">
                     <h2>Post A Question</h2>
                 </div>
@@ -24,6 +24,7 @@
                 <input name="subject" type="text" id="description" placeholder="Subject">
                 <input name="grade" type="text" id="description" placeholder="Grade">
                 <input class="submit" type="submit" value="Post">
+                
                 <label> &emsp; <%-prompt%> </label>
             </form>
         </div>

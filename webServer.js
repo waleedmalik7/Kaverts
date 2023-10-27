@@ -11,6 +11,7 @@ const emailValidator = require('email-validator');
 const nodemailer = require('nodemailer');
 const axios = require('axios')
 const jwt = require('jsonwebtoken');
+const psURL = 'http://localhost:81/question'
 const jwtKey = "vUL8qmXMqKwSSqUP_O_MRoYNd2taqRnumPc7UhgtX6jAjtgvsni02dbFEC7OlbMjyipUqQHpuzS9opSxZDTN9hiiPI3n_l7-Wo0dTysDLKtXndAvrsxTzkM0y9lk5mAoay9OT9jgJ54v0T8rtjVY4YwkctOO8bciVu_uvu_t_G0"
 const pool = new Pool({
     user: 'ws_login',
@@ -211,7 +212,7 @@ app.get("/signout", async(req, res) => {
     res.redirect("/login")
 })
 
-app.post("/question", async(req, res) => {
+app.post("/", async(req, res) => {
     if (req.body.description, req.body.subject, req.body.grade) {
         const form = {
             studentEmail: req.session.user,
@@ -219,15 +220,16 @@ app.post("/question", async(req, res) => {
             subject: req.body.subject,
             levelName: req.body.grade,
         }
-        console.log(form)
-        axios.post('http://localhost:81/question', form, {
+        axios.post(psURL + 'question', form, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
         }).then((response) => {
             res.sendStatus(200)
         }).catch((error) => {
-            console.error(error);
+            res.render("home.ejs", {
+                prompt: "Sorry, there seem to be a problem. Please try again"
+            })
         });
     } else {
         res.render("home.ejs", {
