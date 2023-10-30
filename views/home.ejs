@@ -20,9 +20,28 @@
                 <div class="title-question">
                     <h2>Post A Question</h2>
                 </div>
-                <input name="description" type="text" id="description" placeholder="Question">
-                <input name="subject" type="text" id="description" placeholder="Subject">
-                <input name="grade" type="text" id="description" placeholder="Grade">
+                <input name="description" class="description" type="text" id="question" placeholder="Question">
+                <select name="subject" id="subject" class="dropdown">
+                    <option disabled selected value="">Subject</option>
+                    <option value="option1">Math</option>
+                    <option value="option2">Science</option>
+                    <option value="option3">Biology</option>
+                    <option value="option4">Chemistry</option>
+                    <option value="option5">Physics</option>
+                </select>
+                <select name="grade" id="grade" class="dropdown">
+                    <option disabled selected value="">Grade</option>
+                    <option value="option1">University</option>
+                    <option value="option2">12</option>
+                    <option value="option3">11</option>
+                    <option value="option4">10</option>
+                    <option value="option5">9</option>
+                    <option value="option2">8</option>
+                    <option value="option3">7</option>
+                    <option value="option4">6</option>
+                    <option value="option5">5</option>
+                </select>
+                
                 <input class="submit" type="submit" value="Post">
             </form>
         </div>

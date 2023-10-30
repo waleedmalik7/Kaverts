@@ -60,8 +60,23 @@ body {
     font-family: 'Calibri';
     font-size: 40px;
 }
+.description{
+    display: block;
+    width: 700px;
+    margin: 12px auto;
+    padding: 7px 20px;
+    border-radius: 20px;
+    font-size: 22px;
+    border: none;
+    outline: none;
+    font-family: 'Calibri';
+}
 
-#description{
+.description:focus{
+    outline: 1px dashed #3498db;
+    transform: scale(1.03);
+}
+.dropdown{
     display: block;
     margin: 12px auto;
     padding: 7px 20px;
@@ -70,6 +85,35 @@ body {
     border: none;
     outline: none;
     font-family: 'Calibri';
+}
+.dropdown:focus{
+    outline: 1px dashed #3498db;
+    transform: scale(1.03);
+}
+
+.dropdown option{
+    background-color: #cef2fd65;
+}
+
+.submit {
+    margin: 2px auto; /* Center the submit button horizontally within the form. */
+    width: 80px;
+    height: 30px;
+    display: block;
+    border: none;
+    outline: none;
+    background: #2e11d3;
+    color:#fff ;
+    font-size: 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: 'Calibri';
+}
+.submit:hover{
+    transform: scale(1.03);
+    background-color: #472fcc;
+    color:#d3d3d3;
+    font-weight: bold;
 }
 .copyright{
     font-size: 12px;
