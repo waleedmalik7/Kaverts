@@ -4,7 +4,7 @@
         <title>Kaverts</title>
         <meta name="viewport" content="width=device-width">
         <meta charset="utf-8">
-        <link href="home.css" rel="stylesheet">
+        <link href="add-quals.css" rel="stylesheet">
         <link rel="icon" href="images/Logo.png">
     </head>
 
@@ -16,16 +16,14 @@
         </header>
         <div class="post-container">
             
-            <form id="question-form" method = "POST">
-                <div class="title-question">
-                    <h2>Post A Question</h2>
+            <form id="qual-form" method = "POST">
+                <div class="title-qual">
+                    <h2 class="header">Add qualification for a subject</h2>
                 </div>
-                <input name="description" type="text" class="textInput" placeholder="Question">
                 <input name="subject" type="text" class="textInput" placeholder="Subject">
                 <input name="grade" type="text" class="textInput" placeholder="Grade">
-                <input class="submit" type="submit" value="Post">
-                
-                <label> &emsp; <%-prompt%> </label>
+                <input name="proof" type="text" class="textInput" placeholder="Some Text">
+                <input class="submit" type="submit" value="SUBMIT">
             </form>
         </div>
         <footer>

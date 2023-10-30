@@ -67,6 +67,17 @@ input[type="checkbox"]{
     cursor: pointer;
 }
 
+#userType {
+    width: 150px;
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    font-family: 'Calibri';
+}
 
 .checkbox-label{
     font-family: 'Calibri';

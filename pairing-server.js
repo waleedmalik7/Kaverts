@@ -3,7 +3,7 @@ const app = express()
 const http = require("http")
 const port = 81
 const { Pool } = require('pg')
-const ActiveTutor = require("./psClasses.js")
+const ActiveTutor = require("./ps-classes.js")
 const pool = new Pool({
     user: 'ps_login',
     host: 'localhost',
