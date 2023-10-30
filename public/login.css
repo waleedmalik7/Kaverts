@@ -27,6 +27,17 @@ input[type="password"]{
     outline: none;
     font-family: 'Calibri';
 }
+#userType {
+    width: 150px;
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    font-family: 'Calibri';
+}
 .submit {
     margin: 2px auto; /* Center the submit button horizontally within the form. */
     width: 80px;

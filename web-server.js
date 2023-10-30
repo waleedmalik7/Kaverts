@@ -9,7 +9,9 @@ const bycrypt = require('bcrypt')
 const saltRounds = 4
 const emailValidator = require('email-validator');
 const nodemailer = require('nodemailer');
+const axios = require('axios')
 const jwt = require('jsonwebtoken');
+const psURL = 'http://localhost:81/question'
 const jwtKey = "vUL8qmXMqKwSSqUP_O_MRoYNd2taqRnumPc7UhgtX6jAjtgvsni02dbFEC7OlbMjyipUqQHpuzS9opSxZDTN9hiiPI3n_l7-Wo0dTysDLKtXndAvrsxTzkM0y9lk5mAoay9OT9jgJ54v0T8rtjVY4YwkctOO8bciVu_uvu_t_G0"
 const pool = new Pool({
     user: 'ws_login',
@@ -47,11 +49,18 @@ const transporter = nodemailer.createTransport({
 app.post("/login", async (req, res) => {
     let email = req.body.email
     let pw = req.body.password
+    let userType = req.body.userType
     if (email && pw) { // If user entered email and password, check if hashed password matches DB
-        run_query("SELECT pw_hash, active FROM student WHERE email = $1;", [email], async (result)=> {
+        if(userType == "tutor") {
+            sqlQuery = "SELECT pw_hash, active FROM tutor WHERE email = $1;"
+        } else {
+            sqlQuery = "SELECT pw_hash, active FROM student WHERE email = $1;"
+        }
+        run_query(sqlQuery, [email], async (result)=> {
             if (result.rows.length && await bycrypt.compare(pw, result.rows[0].pw_hash)) {
                 req.session.user = email
                 req.session.userActive = result.rows[0].active
+                req.session.tutor = (userType == "tutor")
                 res.redirect("/")
             }
             else {
@@ -67,7 +76,7 @@ app.post("/login", async (req, res) => {
 
 app.get("/login", async (req, res) => {
     if (req.session.user) {
-        req.session.user = null
+        req.session.destroy
         res.redirect("/")
     } else {
         res.render("login.ejs", {
@@ -79,7 +88,7 @@ app.get("/login", async (req, res) => {
 
 app.get("/signup", async (req, res) => {
     if (req.session.user) {
-        req.session.user = null
+        req.session.destroy
         res.redirect("/")
     } else {
         res.render("sign-up.ejs", {
@@ -95,11 +104,15 @@ app.post("/signup", async (req, res) => {
         let pw = req.body.password
         let name = req.body.name.split(" ", 2)
         let email = req.body.username
+        let userType = req.body.userType
         if (await emailValidator.validate(email)) { // Check if email exists
-            sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4) RETURNING id;"
+            sql_query = "INSERT INTO tutor (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4) RETURNING id;"
+            if (userType == 'student') {
+                sql_query = "INSERT INTO student (f_name, l_name, email, pw_hash) VALUES ($1, $2, $3, $4) RETURNING id;"
+            }
             run_query(sql_query, [name[0], name[1], email, await bycrypt.hash(pw, saltRounds)], async(result) => {
                 // Craft email to send to user
-                let token = jwt.sign({data: email}, jwtKey, { expiresIn: '10m' } ); 
+                let token = jwt.sign({data: {email: email, userType: userType}}, jwtKey, { expiresIn: '10m' } ); 
                 let mailConfig = {
                     from: "kaverts.emailer@gmail.com",
                     to: email,
@@ -129,6 +142,7 @@ app.post("/signup", async (req, res) => {
                     })
                 } else {
                     console.log(sqlError)
+                    res.sendStatus(500)
                 }
             })
         } else {
@@ -149,16 +163,15 @@ app.post("/signup", async (req, res) => {
 })
 
 app.post("/resend", async(req, res) => {
-    console.log(req.body)
     // If client requests new email with confirmation link
     let token = jwt.sign({data: req.body.email}, jwtKey, { expiresIn: '10m' } ); 
     let mailConfig = {
         from: "kaverts.emailer@gmail.com",
-        to: req.body.email,
-        subject: 'Email Verification',
-        text:  `Hi, thank you for using our platform. Please follow the given link to verify your email 
-http://localhost:${port}/verify/${token}. 
-Hope you enjoy!` 
+        to:  req.body.email,
+        subject: 'Email Verification for Kaverts',
+        html:  `<p> Hi, thank you for using our platform. Please follow the given link to verify your email  </p>
+            <p> ` + `http://localhost:${port}/verify/${token}` + `</p>
+            <p> Hope you enjoy! </p>`
     };
     transporter.sendMail(mailConfig, (err) => {
         if (err) {
@@ -172,19 +185,28 @@ Hope you enjoy!`
 })
 
 app.get("/verify/:token", async(req, res) => {
+    req.session.destroy
     // Verifies email belongs to user
     let token = req.params.token
+    
     jwt.verify(token, jwtKey, (err, decoded) => {
         if (err) {
-            console.log(err)
+            res.send("Sorry, this link has expired")
         } else {
-            run_query("UPDATE student SET active = True WHERE email = $1", [decoded.data], async(result) => {
-                req.session.user = decoded.data
-                req.session.userActive = true
-                res.redirect("/")
-            }, async(sqlError) => {
-                console.log(sqlError)
+            if (decoded.data.userType == "student") {
+                run_query("UPDATE student SET active = True WHERE email = $1", [decoded.data.email], async(result) => {
+                    req.session.user = decoded.data
+                    req.session.userActive = true
+                    res.redirect("/")
+                })
+            } else {
+                run_query("UPDATE tutor SET active = True WHERE email = $1", [decoded.data.email], async(result) => {
+                    req.session.user = decoded.data
+                    req.session.userActive = true
+                    req.session.tutor = true
+                    res.redirect("/add-quals")
             })
+            }
         }
     })
 })
@@ -192,14 +214,21 @@ app.get("/verify/:token", async(req, res) => {
 app.get("/", async(req, res) => {
     if (req.session.user) {
         if (req.session.userActive) {
-            res.render("home.ejs")
+            if (req.session.tutor) {
+                res.render("add-quals.ejs", {
+                })
+            } else {
+                res.render("home.ejs", {
+                    prompt: ""
+                })
+            }
         } else {
-            res.render("waitEmailConfirm.ejs", {
+            res.render("wait-email-confirm.ejs", {
                 prevEmail: req.session.user
             })
         }
     } else {
-        res.send("Main page")
+        res.redirect("/login")
     }
 })
 
@@ -209,8 +238,47 @@ app.get("/signout", async(req, res) => {
     res.redirect("/login")
 })
 
+app.get("/add-quals", async(req, res) => {
+    if (req.session.user && req.session.tutor) {
+        if (req.session.userActive) {
+            res.render("add-quals.ejs")
+        } else {
+            res.render("wait-email-confirm.ejs", {
+                prevEmail: req.session.user
+            })
+        }
+    } else {
+        res.redirect("/login")
+    }
+})
+
+app.post("/", async(req, res) => {
+    if (req.body.description, req.body.subject, req.body.grade) {
+        const form = {
+            studentEmail: req.session.user,
+            question: req.body.description,
+            subject: req.body.subject,
+            levelName: req.body.grade,
+        }
+        axios.post(psURL + 'question', form, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        }).then((response) => {
+            res.sendStatus(200)
+        }).catch((error) => {
+            res.render("home.ejs", {
+                prompt: "Sorry, there seem to be a problem. Please try again"
+            })
+        });
+    } else {
+        res.render("home.ejs", {
+            prompt: "Uh oh, seems like you missed a spot."
+        })
+    }
+})
 // Asynchronously runs a Postgresql query
-async function run_query(query, params, callback, errHandle){ 
+async function run_query(query, params, callback, errHandle = (error)=> {console.log(error)}){ 
     try {
         const result = await pool.query(query, params);
         callback(result)

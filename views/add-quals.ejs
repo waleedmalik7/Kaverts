@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <title>Kaverts</title>
+        <meta name="viewport" content="width=device-width">
+        <meta charset="utf-8">
+        <link href="add-quals.css" rel="stylesheet">
+        <link rel="icon" href="images/Logo.png">
+    </head>
+
+    <body>
+        <header>
+            <a href = "/"> <button id="home-button" > Home </button></a>
+            <a href="/signout"> <button id="sign-out" > Sign Out </button></a>
+            <a href="/profile"><button id="profile-button" > Profile </button></a>
+        </header>
+        <div class="post-container">
+            
+            <form id="qual-form" method = "POST">
+                <div class="title-qual">
+                    <h2 class="header">Add qualification for a subject</h2>
+                </div>
+                <input name="subject" type="text" class="textInput" placeholder="Subject">
+                <input name="grade" type="text" class="textInput" placeholder="Grade">
+                <input name="proof" type="text" class="textInput" placeholder="Some Text">
+                <input class="submit" type="submit" value="SUBMIT">
+            </form>
+        </div>
+        <footer>
+            <p class="copyright">Copyright 2023 Kaverts &copy;</p>
+        </footer>
+    </body>
+    
+</html>

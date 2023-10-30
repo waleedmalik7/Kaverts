@@ -49,7 +49,7 @@ body {
     margin: 0;
     min-width: 800px;
 }
-.question-form{
+#question-form{
     text-align: center;
     background: #cef2fd;
     min-width: 800px;
