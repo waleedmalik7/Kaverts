@@ -61,9 +61,10 @@ body {
     font-size: 40px;
 }
 
-.textInput{
+.selectInput{
     display: block;
     margin: 12px auto;
+    width: 200px;
     padding: 7px 20px;
     border-radius: 20px;
     font-size: 18px;
@@ -71,6 +72,34 @@ body {
     outline: none;
     font-family: 'Calibri';
 }
+
+.textInput{
+    display: block;
+    margin: 12px auto;
+    width: 400px;
+    padding: 7px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    font-family: 'Calibri';
+}
+
+.submit {
+    margin: 2px auto; /* Center the submit button horizontally within the form. */
+    width: 80px;
+    height: 30px;
+    display: block;
+    border: none;
+    outline: none;
+    background: #2e11d3;
+    color:#fff ;
+    font-size: 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: 'Calibri';
+}
+
 .copyright{
     font-size: 12px;
     font-family: Arial;

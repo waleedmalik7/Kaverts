@@ -23,25 +23,16 @@
                 <input name="description" class="description" type="text" id="question" placeholder="Question">
                 <select name="subject" id="subject" class="dropdown">
                     <option disabled selected value="">Subject</option>
-                    <option value="option1">Math</option>
-                    <option value="option2">Science</option>
-                    <option value="option3">Biology</option>
-                    <option value="option4">Chemistry</option>
-                    <option value="option5">Physics</option>
+                    <% for (var i = 0; i < academicLevels.length; i++) { %>
+                        <option value="<%= subject[i].name%>"><%= subject[i].name %></option>
+                    <% } %>
                 </select>
                 <select name="grade" id="grade" class="dropdown">
                     <option disabled selected value="">Grade</option>
-                    <option value="option1">University</option>
-                    <option value="option2">12</option>
-                    <option value="option3">11</option>
-                    <option value="option4">10</option>
-                    <option value="option5">9</option>
-                    <option value="option2">8</option>
-                    <option value="option3">7</option>
-                    <option value="option4">6</option>
-                    <option value="option5">5</option>
+                    <% for (var i = 0; i < academicLevels.length; i++) { %>
+                        <option value="<%= academicLevels[i].level %>"><%= academicLevels[i].name %></option>
+                    <% } %>
                 </select>
-                
                 <input class="submit" type="submit" value="Post">
                 
                 <label> &emsp; <%-prompt%> </label>

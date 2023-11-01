@@ -16,14 +16,24 @@
         </header>
         <div class="post-container">
             
-            <form id="qual-form" method = "POST">
+            <form id="qual-form" method = "POST" action = "/add-quals">
                 <div class="title-qual">
                     <h2 class="header">Add qualification for a subject</h2>
-                </div>
-                <input name="subject" type="text" class="textInput" placeholder="Subject">
-                <input name="grade" type="text" class="textInput" placeholder="Grade">
+                </div><select class = 'selectInput' name="subject">
+                    <option disabled selected value="">Subject</option>
+                    <% for (var i = 0; i < subjects.length; i++) { %>
+                        <option value="<%= subjects[i].name %>"><%= subjects[i].name %></option>
+                    <% } %>
+                </select>
+                <select class = 'selectInput' name="grade">
+                    <option disabled selected value="">Grade</option>
+                    <% for (var i = 0; i < academicLevels.length; i++) { %>
+                        <option value="<%= academicLevels[i].level %>"><%= academicLevels[i].name %></option>
+                    <% } %>
+                </select>
                 <input name="proof" type="text" class="textInput" placeholder="Some Text">
                 <input class="submit" type="submit" value="SUBMIT">
+                <label> &emsp; <%-prompt%> </label>
             </form>
         </div>
         <footer>

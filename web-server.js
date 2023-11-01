@@ -11,6 +11,7 @@ const emailValidator = require('email-validator');
 const nodemailer = require('nodemailer');
 const axios = require('axios')
 const jwt = require('jsonwebtoken');
+const { run } = require('node:test');
 const psURL = 'http://localhost:81/question'
 const jwtKey = "vUL8qmXMqKwSSqUP_O_MRoYNd2taqRnumPc7UhgtX6jAjtgvsni02dbFEC7OlbMjyipUqQHpuzS9opSxZDTN9hiiPI3n_l7-Wo0dTysDLKtXndAvrsxTzkM0y9lk5mAoay9OT9jgJ54v0T8rtjVY4YwkctOO8bciVu_uvu_t_G0"
 const pool = new Pool({
@@ -45,6 +46,15 @@ const transporter = nodemailer.createTransport({
         pass: "qoipqcnipdzczkaa"
     }
 });
+
+let subjects = [];
+let academicLevels = []
+run_query("SELECT * FROM subject;", [], (result)=> {
+    subjects = result.rows
+})
+run_query("SELECT * FROM academic_level", [], (result)=> {
+    academicLevels = result.rows
+})
 
 app.post("/login", async (req, res) => {
     let email = req.body.email
@@ -216,9 +226,14 @@ app.get("/", async(req, res) => {
         if (req.session.userActive) {
             if (req.session.tutor) {
                 res.render("add-quals.ejs", {
+                    subjects: subjects,
+                    academicLevels: academicLevels,
+                    prompt: ""
                 })
             } else {
                 res.render("home.ejs", {
+                    subjects: subjects,
+                    academicLevels: academicLevels,
                     prompt: ""
                 })
             }
@@ -241,7 +256,11 @@ app.get("/signout", async(req, res) => {
 app.get("/add-quals", async(req, res) => {
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
-            res.render("add-quals.ejs")
+            res.render("add-quals.ejs", {
+                subjects: subjects,
+                academicLevels: academicLevels,
+                prompt: ""
+            })
         } else {
             res.render("wait-email-confirm.ejs", {
                 prevEmail: req.session.user
@@ -277,6 +296,38 @@ app.post("/", async(req, res) => {
         })
     }
 })
+
+app.post("/add-quals", async(req, res)=> {
+    if (req.session.user && req.session.tutor) {
+        if (req.session.userActive) {
+            insertQuery = "INSERT INTO qualification VALUES ((SELECT id FROM tutor WHERE email = $1), $2, $3);"
+            run_query(insertQuery, [req.session.user, req.body.subject, req.body.grade], async(result)=> {
+                res.render("add-quals.ejs", {
+                    subjects: subjects,
+                    academicLevels: academicLevels,
+                    prompt: "Qualification has been added. We are now verifying it."
+                })
+            }, async(sqlError) =>{
+                if (sqlError.code == "23505") {
+                    res.render("add-quals.ejs", {
+                        subjects: subjects,
+                        academicLevels: academicLevels,
+                        prompt: "Uh oh, it seems like you have already added this qualification."
+                    })
+                } else {
+                    res.sendStatus(400)
+                }
+            })
+        } else {
+            res.render("wait-email-confirm.ejs", {
+                prevEmail: req.session.user
+            })
+        }
+    } else {
+        res.redirect("/login")
+    }
+})
+
 // Asynchronously runs a Postgresql query
 async function run_query(query, params, callback, errHandle = (error)=> {console.log(error)}){ 
     try {
