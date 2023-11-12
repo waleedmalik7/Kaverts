@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <title>Kaverts</title>
+        <meta name="viewport" content="width=device-width">
+        <meta charset="utf-8">
+        <link href="tutor-searching.css" rel="stylesheet">
+        <link rel="icon" href="images/Logo.png">
+    </head>
+
+    <body>
+        <header>
+            <a href = "/"> <button id="home-button" > Home </button></a>
+            <a href="/signout"> <button id="sign-out" > Sign Out </button></a>
+            <a href="/profile"><button id="profile-button" > Profile </button></a>
+        </header>
+        <div class="post-container">
+            <a href="/tutor-searching">REFRESH</a>
+            <table>
+                <% for (var i = 0; i < data.length; i++) { %>
+                    <tr>
+                        <td><%= data[i].id%></td>
+                        <td><%= data[i].prompt%></td>
+                        <td><%= data[i].subject%></td>
+                        <td><%= data[i].level%></td>
+                     </tr>
+                <% } %>
+            </table>
+        </div>
+        <footer>
+            <p class="copyright">Copyright 2023 Kaverts &copy;</p>
+        </footer>
+    </body>
+    
+</html>

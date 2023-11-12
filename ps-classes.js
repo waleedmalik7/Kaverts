@@ -1,17 +1,8 @@
 class ActiveTutors {
-    constructor(id, quals) {
-        this.id = id
+    constructor(email, quals) {
+        this.email = email
         this.quals = quals
         this.questions = []
-    }
-}
-
-class Question {
-    constructor(prompt, subject, userId, level) {
-        this.prompt = prompt
-        this.subject = subject
-        this.userId = userId
-        this.level = level
     }
 }
 

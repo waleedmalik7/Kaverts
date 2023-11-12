@@ -12,7 +12,7 @@ const nodemailer = require('nodemailer');
 const axios = require('axios')
 const jwt = require('jsonwebtoken');
 const { run } = require('node:test');
-const psURL = 'http://localhost:81/question'
+const psURL = 'http://localhost:81'
 const jwtKey = "vUL8qmXMqKwSSqUP_O_MRoYNd2taqRnumPc7UhgtX6jAjtgvsni02dbFEC7OlbMjyipUqQHpuzS9opSxZDTN9hiiPI3n_l7-Wo0dTysDLKtXndAvrsxTzkM0y9lk5mAoay9OT9jgJ54v0T8rtjVY4YwkctOO8bciVu_uvu_t_G0"
 const pool = new Pool({
     user: 'ws_login',
@@ -214,7 +214,7 @@ app.get("/verify/:token", async(req, res) => {
                     req.session.user = decoded.data
                     req.session.userActive = true
                     req.session.tutor = true
-                    res.redirect("/add-quals")
+                    res.redirect("/")
             })
             }
         }
@@ -225,13 +225,9 @@ app.get("/", async(req, res) => {
     if (req.session.user) {
         if (req.session.userActive) {
             if (req.session.tutor) {
-                res.render("add-quals.ejs", {
-                    subjects: subjects,
-                    academicLevels: academicLevels,
-                    prompt: ""
-                })
+                res.render("tutor-home.ejs")
             } else {
-                res.render("home.ejs", {
+                res.render("student-home.ejs", {
                     subjects: subjects,
                     academicLevels: academicLevels,
                     prompt: ""
@@ -272,28 +268,51 @@ app.get("/add-quals", async(req, res) => {
 })
 
 app.post("/", async(req, res) => {
-    if (req.body.description, req.body.subject, req.body.grade) {
-        const form = {
-            studentEmail: req.session.user,
-            question: req.body.description,
-            subject: req.body.subject,
-            levelName: req.body.grade,
+    if (req.session.tutor) {
+        if (!req.session.searching) {
+            const form = {
+                tutorEmail: req.session.user
+            }
+            axios.post(psURL + '/active', form, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }).then((response) => {
+                res.redirect("/tutor-searching")
+            }).catch((error) => {
+                res.render("tutor-home.ejs")
+            });
+        } else {
+            res.redirect("/tutor-searching")
         }
-        axios.post(psURL + 'question', form, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        }).then((response) => {
-            res.sendStatus(200)
-        }).catch((error) => {
-            res.render("home.ejs", {
-                prompt: "Sorry, there seem to be a problem. Please try again"
-            })
-        });
     } else {
-        res.render("home.ejs", {
-            prompt: "Uh oh, seems like you missed a spot."
-        })
+        if (req.body.description, req.body.subject, req.body.grade) {
+            const form = {
+                studentEmail: req.session.user,
+                question: req.body.description,
+                subject: req.body.subject,
+                level: req.body.grade,
+            }
+            axios.post(psURL + '/question', form, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }).then((response) => {
+                res.sendStatus(200)
+            }).catch((error) => {
+                res.render("student-home.ejs", {
+                    subjects: subjects,
+                    academicLevels: academicLevels,
+                    prompt: "Sorry, there seem to be a problem. Please try again"
+                })
+            });
+        } else {
+            res.render("student-home.ejs", {
+                subjects: subjects,
+                academicLevels: academicLevels,
+                prompt: "Uh oh, seems like you missed a spot."
+            })
+        }
     }
 })
 
@@ -322,6 +341,37 @@ app.post("/add-quals", async(req, res)=> {
             res.render("wait-email-confirm.ejs", {
                 prevEmail: req.session.user
             })
+        }
+    } else {
+        res.redirect("/login")
+    }
+})
+
+app.get("/profile", async(req, res)=> {
+    res.redirect("/add-quals")
+})
+
+app.get("/tutor-searching", async(req, res)=> {
+    if (req.session.user && req.session.tutor) {
+        if (req.session.userActive) {
+            axios.get(psURL + '/questions/' + req.session.user, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }).then((response) => {
+                selectQuery = "SELECT * FROM question WHERE id in ("
+                for (i = 0; i < response.data.length; i++) {
+                    selectQuery += response.data[i] + ","
+                }
+                selectQuery += "-1);"
+                run_query(selectQuery, [], async(result)=> {
+                    res.render("tutor-searching.ejs", {
+                        data: result.rows
+                    })   
+                }) 
+            }).catch((error) => {
+                res.render("tutor-home.ejs")
+            });
         }
     } else {
         res.redirect("/login")
