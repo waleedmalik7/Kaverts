@@ -4,6 +4,7 @@ const http = require("http")
 const port = 81
 const { Pool } = require('pg')
 const ActiveTutor = require("./ps-classes.js")
+const { active } = require('requests')
 const pool = new Pool({
     user: 'ps_login',
     host: 'localhost',
@@ -19,15 +20,14 @@ var activeTutors = {}
  * Student posts a question into the forum
  */
 app.post("/question", (req, res) => {
-    console.log(req.body)
     sqlInsert = `INSERT INTO question (student_id, prompt, subject, level, status) VALUES ((SELECT id FROM student WHERE email = $1),
-    $2,$3,(SELECT level FROM academic_level WHERE name = $4),False)RETURNING id;`
-    sqlParams = [req.body.studentEmail, req.body.question, req.body.subject, req.body.levelName]
+    $2,$3,$4,False)RETURNING id;`
+    sqlParams = [req.body.studentEmail, req.body.question, req.body.subject, req.body.level]
     run_query(sqlInsert, sqlParams, (result) => {
         questionId = result.rows[0].id
         for (const [key, tutor] of Object.entries(activeTutors)) {
             for (let j = 0; j < tutor.quals.length; j++) {
-                if (tutor.quals[j][0] == req.body.subject && tutor.quals[j][1] > req.body.level) {
+                if (tutor.quals[j][0] == req.body.subject && tutor.quals[j][1] >= req.body.level) {
                     tutor.questions.push(questionId)
                 }
             }
@@ -42,31 +42,33 @@ app.post("/question", (req, res) => {
 /**
  * Tutor gets list of questions assigned to them
  */
-app.get("/questions", (req, res) => {
-    tutorID = req.body.tutorId
-    if (activeTutors.tutorId) {
-        res.json(activeTutors.tutorID.questions)
+app.get("/questions/:tutorEmail", (req, res) => {
+    if (activeTutors[req.params.tutorEmail]) {
+        res.json([46])
+        // res.json(activeTutors[req.params.tutorEmail].questions)
     } else {
         res.sendStatus(404)
     }
 })
-
 /**
  * Tutors lets server know they are actively looking for question
  */
 app.post("/active", (req, res) => {
-    run_query("SELECT * FROM qualification WHERE tutor_id = $1;", [req.body.tutorId], (result) => {
+    sqlQuery = "SELECT * FROM qualification WHERE tutor_id = (SELECT id FROM tutor WHERE email = $1);"
+    run_query(sqlQuery, [req.body.tutorEmail], (result) => {
         if (result.rows.length > 0) {
             quals = []
             for (var i = 0; i < result.rows.length; i++) {
                 quals.push([result.rows[i].subject_name, parseInt(result.rows[i].subject_level)])
             }
-            tutorID = req.body.tutorId
-            activeTutors.tutorID = new ActiveTutor(tutorID, quals)
+            activeTutors[req.body.tutorEmail] = new ActiveTutor(req.body.tutorEmail, quals)
             res.sendStatus(200)
         } else { 
             res.status(303).send("Please add qualifications.")
         }
+    }, (err)=> {
+        console.log(err)
+        res.sendStatus(500)
     })
 })
 
@@ -75,9 +77,9 @@ app.post("/active", (req, res) => {
  * Tutors lets server know they are are no longer actively looking for question
  */
 app.post("/deactive", (req, res) => {
-    tutorID = req.body.tutorId 
-    if (activeTutors.tutorID) {
-        delete activeTutors.tutorID
+    tutorEmail = req.body.tutorEmail
+    if (activeTutors.tutorEmail) {
+        delete activeTutors.tutorEmail
         res.sendStatus(200)
     } else {
         res.sendStatus(404)

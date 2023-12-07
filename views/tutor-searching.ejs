@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <title>Kaverts</title>
+        <meta name="viewport" content="width=device-width">
+        <meta charset="utf-8">
+        <link href="tutor-searching.css" rel="stylesheet">
+        <link rel="icon" href="images/Logo.png">
+    </head>
+
+    <body>
+        <header>
+            <a href = "/"> <button id="home-button" > Home </button></a>
+            <a href="/signout"> <button id="sign-out" > Sign Out </button></a>
+            <a href="/profile"><button id="profile-button" > Profile </button></a>
+        </header>
+        <div id="post-container">
+            <table id="questions-table">
+                <a href="/tutor-searching" id="refresh">REFRESH</a>
+                <thead>
+                    <tr>
+                        <th id="question-col">Question</th>
+                        <th id="subject-col">Subject</th>
+                        <th>Academic Level</th>
+                    </tr>
+                </thead>
+                <% for (var i = 0; i < data.length; i++) { %>
+                    <tr onClick="getQuestion('<%= data[i].id%>')">
+                        <td><%= data[i].prompt%></td>
+                        <td><%= data[i].subject%></td>
+                        <td><%= data[i].level%></td>
+                    </tr>
+                <% } %>
+            </table>
+
+            <script>
+                function getQuestion(id){
+                    window.location.href = "pairing/" + id
+                }
+    
+            </script>
+        </div>
+        <footer>
+            <p class="copyright">Copyright 2023 Kaverts &copy;</p>
+        </footer>
+    </body>
+    
+    
+</html>

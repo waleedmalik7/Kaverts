@@ -1,0 +1,108 @@
+body {
+    margin: 0;
+    background-color: #cef2fd65;
+}
+
+#sign-out {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#home-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 110px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#profile-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    height: 30px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    margin: 0;
+}
+
+#post-container{
+    background-color: white;
+    width: 600px;
+    height: 2000px;
+    margin-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#refresh{
+    font-family: monospace;
+    background-color: blue;
+    padding: 5px;
+    border: 2px solid black;
+    border-radius: 10px;
+    font-size: large;
+    color:white;
+    text-decoration: none;
+}
+
+#questions-table{
+    font-family: monospace;
+    background-color: white;
+    border-collapse: collapse;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+}
+
+#question-col{
+    width: 400px;
+    cursor:pointer;
+}
+
+#subject-col{
+    width: 100px;
+}
+
+#questions-table td{
+    min-width: 100px;
+    border-collapse: collapse;
+    padding: 8px;
+    border-bottom: 1px solid grey;
+    cursor: pointer;
+}
+
+#questions-table tr:nth-of-type(even){
+    background-color: #e9e5e5;
+}
+
+#questions-table thead {
+    text-align: left;
+    background-color: black;
+    color: white;
+    margin-top: 0;
+}
+
+
+.copyright{
+    font-size: 12px;
+    font-family: Arial;
+    text-align: center;
+    font-weight: bold;
+    padding: 1px;
+}
