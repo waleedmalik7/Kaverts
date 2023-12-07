@@ -44,7 +44,8 @@ app.post("/question", (req, res) => {
  */
 app.get("/questions/:tutorEmail", (req, res) => {
     if (activeTutors[req.params.tutorEmail]) {
-        res.json(activeTutors[req.params.tutorEmail].questions)
+        res.json([46])
+        // res.json(activeTutors[req.params.tutorEmail].questions)
     } else {
         res.sendStatus(404)
     }

@@ -347,8 +347,34 @@ app.post("/add-quals", async(req, res)=> {
     }
 })
 
-app.get("/profile", async(req, res)=> {
-    res.redirect("/add-quals")
+app.get("/profile", async(req, res)=> {if (req.session.user && req.session.tutor) {
+    if (req.session.userActive) {
+        insertQuery = "INSERT INTO qualification VALUES ((SELECT id FROM tutor WHERE email = $1), $2, $3);"
+        run_query(insertQuery, [req.session.user, req.body.subject, req.body.grade], async(result)=> {
+            res.render("add-quals.ejs", {
+                subjects: subjects,
+                academicLevels: academicLevels,
+                prompt: "Qualification has been added. We are now verifying it."
+            })
+            }, async(sqlError) =>{
+                if (sqlError.code == "23505") {
+                    res.render("add-quals.ejs", {
+                        subjects: subjects,
+                        academicLevels: academicLevels,
+                        prompt: "Uh oh, it seems like you have already added this qualification."
+                    })
+                } else {
+                    res.sendStatus(400)
+                }
+            })
+        } else {
+            res.render("wait-email-confirm.ejs", {
+                prevEmail: req.session.user
+            })
+        }
+    } else {
+        res.redirect("/login")
+    }
 })
 
 app.get("/tutor-searching", async(req, res)=> {
@@ -378,6 +404,23 @@ app.get("/tutor-searching", async(req, res)=> {
     }
 })
 
+app.get("/pairing/:questionID", async(req, res)=> {
+    if (req.session.user && req.session.tutor) {
+        if (req.session.userActive) {
+            sqlQuery = "SELECT * FROM Question WHERE ID = $1;"
+            run_query(sqlQuery, [req.params.questionID], async(result)=>{
+                console.log(result.rows[0])
+                res.send("Good job")
+            })
+        } else {
+            res.render("wait-email-confirm.ejs", {
+                prevEmail: req.session.user
+            })
+        }
+    } else {
+        res.redirect("/login")
+    }
+})
 // Asynchronously runs a Postgresql query
 async function run_query(query, params, callback, errHandle = (error)=> {console.log(error)}){ 
     try {

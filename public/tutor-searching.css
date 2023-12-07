@@ -27,16 +27,6 @@ body {
     cursor: pointer;
 }
 
-.post-container{
-    background: #cef2fd65;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* This centers the form vertically on the page. */
-    margin: 0;
-    min-width: 800px;
-}
-
 #profile-button {
     font-family: 'Oswald', sans-serif;
     background: black;
@@ -49,6 +39,65 @@ body {
     cursor: pointer;
     margin: 0;
 }
+
+#post-container{
+    background-color: white;
+    width: 600px;
+    height: 2000px;
+    margin-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#refresh{
+    font-family: monospace;
+    background-color: blue;
+    padding: 5px;
+    border: 2px solid black;
+    border-radius: 10px;
+    font-size: large;
+    color:white;
+    text-decoration: none;
+}
+
+#questions-table{
+    font-family: monospace;
+    background-color: white;
+    border-collapse: collapse;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+}
+
+#question-col{
+    width: 400px;
+    cursor:pointer;
+}
+
+#subject-col{
+    width: 100px;
+}
+
+#questions-table td{
+    min-width: 100px;
+    border-collapse: collapse;
+    padding: 8px;
+    border-bottom: 1px solid grey;
+    cursor: pointer;
+}
+
+#questions-table tr:nth-of-type(even){
+    background-color: #e9e5e5;
+}
+
+#questions-table thead {
+    text-align: left;
+    background-color: black;
+    color: white;
+    margin-top: 0;
+}
+
 
 .copyright{
     font-size: 12px;
