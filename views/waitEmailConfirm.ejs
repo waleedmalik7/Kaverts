@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <title>Kaverts</title>
+        <meta name="viewport" content="width=device-width">
+        <meta charset="utf-8">
+        <link href="waitEmailConfirm.css" rel="stylesheet">
+        <link rel="icon" href="images/Logo.png">
+    </head>
+
+    <body>
+        <header>
+            <a href="/signout">
+                <button id="sign-out" > Sign out </button>
+             </a>
+        </header>
+        <div class="login-container">
+            <form id="login-form">
+                <div class="img-container">
+                    <img src="images/Company.png" alt="Company Logo">
+                </div>
+                <p> An email has been send to <%-prevEmail%>. Please check your inbox to find the verification link.</p>
+                <input name="email" type="hidden" value=<%-prevEmail %> id="email">
+                <input class="submit" type="submit" value="Resend Link">
+            </form>
+        </div>
+        <script>
+            document.getElementById("login-form").addEventListener("submit", (e) => {
+                e.preventDefault()
+                const urlSearchParams = new URLSearchParams();
+
+                // Add key-value pairs to the object
+                urlSearchParams.append("email", document.getElementById("email").value);
+                
+                // Make an asynchronous POST request using Fetch
+                fetch("/resend", {
+                        method: "POST",
+                        body: urlSearchParams.toString(),
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                })
+                .then(response => {
+                    console.log("Link has been resent")
+                })
+                .catch(error => {
+                    console.log(error)
+                });
+            });
+
+        </script>
+        <footer>
+            <p class="copyright">Copyright 2023 Kaverts &copy;</p>
+        </footer>
+    </body>
+
+</html>
