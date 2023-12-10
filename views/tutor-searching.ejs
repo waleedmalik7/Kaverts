@@ -15,23 +15,27 @@
             <a href="/profile"><button id="profile-button" > Profile </button></a>
         </header>
         <div id="post-container">
-            <table id="questions-table">
-                <a href="/tutor-searching" id="refresh">REFRESH</a>
-                <thead>
-                    <tr>
-                        <th id="question-col">Question</th>
-                        <th id="subject-col">Subject</th>
-                        <th>Academic Level</th>
-                    </tr>
-                </thead>
-                <% for (var i = 0; i < data.length; i++) { %>
-                    <tr onClick="getQuestion('<%= data[i].id%>')">
-                        <td><%= data[i].prompt%></td>
-                        <td><%= data[i].subject%></td>
-                        <td><%= data[i].level%></td>
-                    </tr>
-                <% } %>
-            </table>
+            <a href="/tutor-searching" id="refresh">REFRESH</a>
+            <div id="table-bg">
+                <table id="questions-table">
+                        <thead>
+                            <tr>
+                                <th class="question-col">Question</th>
+                                <th class="subject-col">Subject</th>
+                                <th>Academic Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for (var i = 0; i < data.length; i++) { %>
+                                <tr onClick="getQuestion('<%= data[i].id%>')">
+                                    <td class="question-col"><%= data[i].prompt%></td>
+                                    <td class="subject-col"><%= data[i].subject%></td>
+                                    <td><%= data[i].name%></td>
+                                </tr>
+                            <% } %>
+                        </tbody>    
+                </table>
+            </div>
 
             <script>
                 function getQuestion(id){

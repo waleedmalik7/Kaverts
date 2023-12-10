@@ -1,0 +1,81 @@
+body {
+    margin: 0;
+    background-color: #cef2fd65;
+}
+
+#sign-out {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#home-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 110px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#profile-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    height: 30px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    margin: 0;
+}
+
+.post-container{
+    background: #cef2fd65;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* This centers the form vertically on the page. */
+    margin: 0;
+    min-width: 800px;
+}
+#qual-form{
+    text-align: center;
+    background: #cef2fd;
+    min-width: 800px;
+    padding: 20px;
+    border-radius: 50px;
+}
+
+.submit {
+    margin: 2px auto; /* Center the submit button horizontally within the form. */
+    width: 200px;
+    height: 60px;
+    display: block;
+    border: none;
+    outline: none;
+    background: #2e11d3;
+    color:#fff ;
+    font-size: 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: 'Calibri';
+}
+
+.copyright{
+    font-size: 12px;
+    font-family: Arial;
+    text-align: center;
+    font-weight: bold;
+    padding: 1px;
+}

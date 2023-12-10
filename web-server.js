@@ -385,14 +385,20 @@ app.get("/tutor-searching", async(req, res)=> {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {
-                selectQuery = "SELECT * FROM question WHERE id in ("
+                selectQuery = "SELECT id, prompt, subject, name FROM question INNER JOIN academic_level" +
+                " ON question.level = academic_level.level WHERE id in ("
                 for (i = 0; i < response.data.length; i++) {
                     selectQuery += response.data[i] + ","
                 }
                 selectQuery += "-1);"
+
                 run_query(selectQuery, [], async(result)=> {
+                    test_result = []
+                    for (i=0; i<100; i++) {
+                        test_result.push(result.rows[0])
+                    }
                     res.render("tutor-searching.ejs", {
-                        data: result.rows
+                        data: test_result
                     })   
                 }) 
             }).catch((error) => {
@@ -404,13 +410,24 @@ app.get("/tutor-searching", async(req, res)=> {
     }
 })
 
-app.get("/pairing/:questionID", async(req, res)=> {
+app.get("/test/:p", async(req,res)=> {
+    console.log(req.params)
+    res.render("select-question")
+})
+
+app.get("/pairing/:questionID", async(req, res)=> { 
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
-            sqlQuery = "SELECT * FROM Question WHERE ID = $1;"
+            sqlQuery = "SELECT id, prompt, subject, name FROM question INNER JOIN academic_level" +
+                " ON question.level = academic_level.level WHERE id = $1;"
+            console.log(req.params.questionID)
             run_query(sqlQuery, [req.params.questionID], async(result)=>{
-                console.log(result.rows[0])
-                res.send("Good job")
+                res.render("select-question.ejs", {
+                    id: result.rows[0].id,
+                    prompt: result.rows[0].prompt,
+                    subject: result.rows[0].subject,
+                    grade: result.rows[0].name
+                })
             })
         } else {
             res.render("wait-email-confirm.ejs", {
@@ -421,6 +438,7 @@ app.get("/pairing/:questionID", async(req, res)=> {
         res.redirect("/login")
     }
 })
+
 // Asynchronously runs a Postgresql query
 async function run_query(query, params, callback, errHandle = (error)=> {console.log(error)}){ 
     try {
