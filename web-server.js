@@ -47,6 +47,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+// Gets a list of all subjects and academic levels from the most updated DB
 let subjects = [];
 let academicLevels = []
 run_query("SELECT * FROM subject;", [], (result)=> {
@@ -56,6 +57,7 @@ run_query("SELECT * FROM academic_level", [], (result)=> {
     academicLevels = result.rows
 })
 
+// Post request for a tutor and student trying to log in
 app.post("/login", async (req, res) => {
     let email = req.body.email
     let pw = req.body.password
@@ -84,6 +86,7 @@ app.post("/login", async (req, res) => {
     }
 })
 
+// Get request for tutor and student accessing login page
 app.get("/login", async (req, res) => {
     if (req.session.user) {
         req.session.destroy
@@ -96,6 +99,7 @@ app.get("/login", async (req, res) => {
     }
 })
 
+// Get request for tutor and student accessing sign-up page
 app.get("/signup", async (req, res) => {
     if (req.session.user) {
         req.session.destroy
@@ -109,6 +113,7 @@ app.get("/signup", async (req, res) => {
     }  
 })
 
+// Post request for student and tutor signing up a new account
 app.post("/signup", async (req, res) => {
     if (req.body.name && req.body.password && req.body.username) {
         let pw = req.body.password
@@ -172,6 +177,7 @@ app.post("/signup", async (req, res) => {
 
 })
 
+//Post request for student and tutor asking server to resend verification email
 app.post("/resend", async(req, res) => {
     // If client requests new email with confirmation link
     let token = jwt.sign({data: req.body.email}, jwtKey, { expiresIn: '10m' } ); 
@@ -194,6 +200,7 @@ app.post("/resend", async(req, res) => {
     }) 
 })
 
+//Get request for student/tutor activating their account with the emailed link
 app.get("/verify/:token", async(req, res) => {
     req.session.destroy
     // Verifies email belongs to user
@@ -221,6 +228,7 @@ app.get("/verify/:token", async(req, res) => {
     })
 })
 
+//Serves landing page
 app.get("/", async(req, res) => {
     if (req.session.user) {
         if (req.session.userActive) {
@@ -243,12 +251,14 @@ app.get("/", async(req, res) => {
     }
 })
 
+//Serves signout page
 app.get("/signout", async(req, res) => {
     req.session.user = null 
     req.session.activeUser = false
     res.redirect("/login")
 })
 
+//Serves add qualifications page for tutor
 app.get("/add-quals", async(req, res) => {
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
@@ -267,6 +277,7 @@ app.get("/add-quals", async(req, res) => {
     }
 })
 
+//Uploads a question for a student and makes tutor active for tutor
 app.post("/", async(req, res) => {
     if (req.session.tutor) {
         if (!req.session.searching) {
@@ -316,6 +327,7 @@ app.post("/", async(req, res) => {
     }
 })
 
+//Adds qualification to a tutor
 app.post("/add-quals", async(req, res)=> {
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
@@ -347,6 +359,7 @@ app.post("/add-quals", async(req, res)=> {
     }
 })
 
+//Serves profile page
 app.get("/profile", async(req, res)=> {if (req.session.user && req.session.tutor) {
     if (req.session.userActive) {
         insertQuery = "INSERT INTO qualification VALUES ((SELECT id FROM tutor WHERE email = $1), $2, $3);"
@@ -377,6 +390,7 @@ app.get("/profile", async(req, res)=> {if (req.session.user && req.session.tutor
     }
 })
 
+//Serves tutor's page of all available questions to chose from
 app.get("/tutor-searching", async(req, res)=> {
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
@@ -404,7 +418,17 @@ app.get("/tutor-searching", async(req, res)=> {
     }
 })
 
+<<<<<<< Updated upstream
 app.get("/pairing/:questionID", async(req, res)=> {
+=======
+app.get("/test/:p", async(req,res)=> {
+    console.log(req.params.p)
+    res.render("select-question")
+})
+
+//Serves a page for the tutor so select a question to help with
+app.get("/pairing/:questionID", async(req, res)=> { 
+>>>>>>> Stashed changes
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
             sqlQuery = "SELECT * FROM Question WHERE ID = $1;"
