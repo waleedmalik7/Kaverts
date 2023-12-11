@@ -1,0 +1,93 @@
+body {
+    margin: 0;
+    background-color: #cef2fd65;
+}
+
+#sign-out {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#home-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 110px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#profile-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    height: 30px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    margin: 0;
+}
+
+#meta-data{
+    display: flex;
+    margin: 50px auto;
+    width: 300px;
+}
+
+#question-info{
+    font-size: 18px;
+    padding: 5px 20px;
+    font-family: 'Calibri';
+}
+
+.submit {
+    width: 100px;
+    height: 30px;
+    display: block;
+    border: none;
+    outline: none;
+    background: #2e11d3;
+    color:#fff ;
+    font-size: 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: 'Calibri';
+}
+
+.submit:hover{
+    transform: scale(1.03);
+    background-color: #472fcc;
+    color:#d3d3d3;
+    font-weight: bold;
+}
+
+#prompt-div{
+    margin: 2px auto;
+    background: white;
+    width: 700px;
+    min-height: 400px;
+    padding: 80px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-family: 'Calibri';
+}
+
+.copyright{
+    font-size: 12px;
+    font-family: Arial;
+    text-align: center;
+    font-weight: bold;
+    padding: 1px;
+}

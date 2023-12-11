@@ -296,7 +296,7 @@ app.post("/", async(req, res) => {
         } else {
             res.redirect("/tutor-searching")
         }
-    } else {
+    } else if(req.session.user) {
         if (req.body.description, req.body.subject, req.body.grade) {
             const form = {
                 studentEmail: req.session.user,
@@ -324,6 +324,8 @@ app.post("/", async(req, res) => {
                 prompt: "Uh oh, seems like you missed a spot."
             })
         }
+    } else {
+        res.redirect("/login")
     }
 })
 
@@ -399,14 +401,20 @@ app.get("/tutor-searching", async(req, res)=> {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {
-                selectQuery = "SELECT * FROM question WHERE id in ("
+                selectQuery = "SELECT id, prompt, subject, name FROM question INNER JOIN academic_level" +
+                " ON question.level = academic_level.level WHERE id in ("
                 for (i = 0; i < response.data.length; i++) {
                     selectQuery += response.data[i] + ","
                 }
                 selectQuery += "-1);"
+
                 run_query(selectQuery, [], async(result)=> {
+                    test_result = []
+                    for (i=0; i<100; i++) {
+                        test_result.push(result.rows[0])
+                    }
                     res.render("tutor-searching.ejs", {
-                        data: result.rows
+                        data: test_result
                     })   
                 }) 
             }).catch((error) => {
@@ -418,23 +426,19 @@ app.get("/tutor-searching", async(req, res)=> {
     }
 })
 
-<<<<<<< Updated upstream
-app.get("/pairing/:questionID", async(req, res)=> {
-=======
-app.get("/test/:p", async(req,res)=> {
-    console.log(req.params.p)
-    res.render("select-question")
-})
-
 //Serves a page for the tutor so select a question to help with
 app.get("/pairing/:questionID", async(req, res)=> { 
->>>>>>> Stashed changes
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
-            sqlQuery = "SELECT * FROM Question WHERE ID = $1;"
+            sqlQuery = "SELECT id, prompt, subject, name FROM question INNER JOIN academic_level" +
+                " ON question.level = academic_level.level WHERE id = $1;"
             run_query(sqlQuery, [req.params.questionID], async(result)=>{
-                console.log(result.rows[0])
-                res.send("Good job")
+                res.render("select-question.ejs", {
+                    id: result.rows[0].id,
+                    prompt: result.rows[0].prompt,
+                    subject: result.rows[0].subject,
+                    grade: result.rows[0].name
+                })
             })
         } else {
             res.render("wait-email-confirm.ejs", {
@@ -445,6 +449,7 @@ app.get("/pairing/:questionID", async(req, res)=> {
         res.redirect("/login")
     }
 })
+
 // Asynchronously runs a Postgresql query
 async function run_query(query, params, callback, errHandle = (error)=> {console.log(error)}){ 
     try {
