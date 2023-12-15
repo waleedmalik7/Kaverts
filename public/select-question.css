@@ -82,6 +82,12 @@ body {
     border-radius: 50px;
     font-size: 18px;
     font-family: 'Calibri';
+    display: block;
+}
+
+.question-pic{
+    margin: 10px auto;
+    width: 600px;
 }
 
 .copyright{

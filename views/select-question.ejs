@@ -20,6 +20,10 @@
         </form>
         <div id="prompt-div">
             <label><%=prompt%></label>
+            <br>
+            <% for (var i = 0; i < img_paths.length; i++) { %>
+                <img class="question-pic" src="../uploads/<%=img_paths[i]%>">
+            <% } %>
         </div>
         <footer>
             <p class="copyright">Copyright 2023 Kaverts &copy;</p>

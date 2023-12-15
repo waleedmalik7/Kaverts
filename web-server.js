@@ -14,6 +14,23 @@ const jwt = require('jsonwebtoken');
 const { run } = require('node:test');
 const psURL = 'http://localhost:81'
 const jwtKey = "vUL8qmXMqKwSSqUP_O_MRoYNd2taqRnumPc7UhgtX6jAjtgvsni02dbFEC7OlbMjyipUqQHpuzS9opSxZDTN9hiiPI3n_l7-Wo0dTysDLKtXndAvrsxTzkM0y9lk5mAoay9OT9jgJ54v0T8rtjVY4YwkctOO8bciVu_uvu_t_G0"
+const multer  = require('multer')
+const path = require('path');
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/uploads/'); // Specify the directory where you want to save the files
+    },
+    filename: (req, file, cb) => {
+        if (req.session.user && !req.session.tutor){
+            // Keep the original file extension
+            const originalExt = path.extname(file.originalname);
+            cb(null, file.fieldname + '-' + Date.now() + "-" + req.session.user + originalExt);
+        }
+    }, 
+  });
+  
+const upload = multer({ storage: storage });
+
 const pool = new Pool({
     user: 'ws_login',
     host: 'localhost',
@@ -90,27 +107,23 @@ app.post("/login", async (req, res) => {
 app.get("/login", async (req, res) => {
     if (req.session.user) {
         req.session.destroy
-        res.redirect("/")
-    } else {
-        res.render("login.ejs", {
-            prompt: "",
-            prevEmail: ""
-        })
     }
+    res.render("login.ejs", {
+        prompt: "",
+        prevEmail: ""
+    })
 })
 
 // Get request for tutor and student accessing sign-up page
 app.get("/signup", async (req, res) => {
     if (req.session.user) {
         req.session.destroy
-        res.redirect("/")
-    } else {
-        res.render("sign-up.ejs", {
-            prompt: "",
-            prevEmail: "",
-            prevName: ""
-        })
-    }  
+    }
+    res.render("sign-up.ejs", {
+        prompt: "",
+        prevEmail: "",
+        prevName: ""
+    })
 })
 
 // Post request for student and tutor signing up a new account
@@ -221,14 +234,14 @@ app.get("/verify/:token", async(req, res) => {
                     req.session.user = decoded.data
                     req.session.userActive = true
                     req.session.tutor = true
-                    res.redirect("/")
-            })
+                    res.redirect("/tutor")
+                })
             }
         }
     })
 })
 
-//Serves landing page
+//Serves landing page for student
 app.get("/", async(req, res) => {
     if (req.session.user) {
         if (req.session.userActive) {
@@ -253,8 +266,6 @@ app.get("/", async(req, res) => {
 
 //Serves signout page
 app.get("/signout", async(req, res) => {
-    req.session.user = null 
-    req.session.activeUser = false
     res.redirect("/login")
 })
 
@@ -277,32 +288,24 @@ app.get("/add-quals", async(req, res) => {
     }
 })
 
-//Uploads a question for a student and makes tutor active for tutor
-app.post("/", async(req, res) => {
-    if (req.session.tutor) {
-        if (!req.session.searching) {
-            const form = {
-                tutorEmail: req.session.user
+//Uploads a question for a student
+app.post("/", upload.any('imgs'), (req, res) => {
+    if(req.session.user && !req.session.tutor) {
+        img_path_string = "{"
+        for (i=0; i < req.files.length; i++) {
+            img_path_string += req.files[i].path
+            if (i+1 < req.files.length) {
+                img_path_string += ","
             }
-            axios.post(psURL + '/active', form, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-            }).then((response) => {
-                res.redirect("/tutor-searching")
-            }).catch((error) => {
-                res.render("tutor-home.ejs")
-            });
-        } else {
-            res.redirect("/tutor-searching")
         }
-    } else if(req.session.user) {
+        img_path_string += "}"
         if (req.body.description, req.body.subject, req.body.grade) {
             const form = {
                 studentEmail: req.session.user,
                 question: req.body.description,
                 subject: req.body.subject,
                 level: req.body.grade,
+                img_path: img_path_string
             }
             axios.post(psURL + '/question', form, {
                 headers: {
@@ -327,6 +330,28 @@ app.post("/", async(req, res) => {
     } else {
         res.redirect("/login")
     }
+})
+
+// and makes tutor activ
+app.post("/tutor/active", async(req, res)=> {
+    if (req.session.tutor) {
+        if (!req.session.searching) {
+            const form = {
+                tutorEmail: req.session.user
+            }
+            axios.post(psURL + '/active', form, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }).then((response) => {
+                res.redirect("/tutor-searching")
+            }).catch((error) => {
+                res.render("tutor-home.ejs")
+            });
+        } else {
+            res.redirect("/tutor-searching")
+        }
+    } 
 })
 
 //Adds qualification to a tutor
@@ -430,14 +455,15 @@ app.get("/tutor-searching", async(req, res)=> {
 app.get("/pairing/:questionID", async(req, res)=> { 
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
-            sqlQuery = "SELECT id, prompt, subject, name FROM question INNER JOIN academic_level" +
+            sqlQuery = "SELECT id, prompt, subject, name, img_path FROM question INNER JOIN academic_level" +
                 " ON question.level = academic_level.level WHERE id = $1;"
             run_query(sqlQuery, [req.params.questionID], async(result)=>{
                 res.render("select-question.ejs", {
                     id: result.rows[0].id,
                     prompt: result.rows[0].prompt,
                     subject: result.rows[0].subject,
-                    grade: result.rows[0].name
+                    grade: result.rows[0].name,
+                    img_paths: result.rows[0].img_path
                 })
             })
         } else {

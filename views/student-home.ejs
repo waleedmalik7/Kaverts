@@ -16,7 +16,7 @@
         </header>
         <div class="post-container">
             
-            <form id="question-form" method = "POST">
+            <form id="question-form" method = "POST" enctype ="multipart/form-data">
                 <div class="title-question">
                     <h2>Post A Question</h2>
                 </div>
@@ -31,8 +31,9 @@
                     <option disabled selected value="">Grade</option>
                     <% for (var i = 0; i < academicLevels.length; i++) { %>
                         <option value="<%= academicLevels[i].level %>"><%= academicLevels[i].name %></option>
-                    <% } %>
+                    <% } %> 
                 </select>
+                <input id ='fileInput' type ="file" accept="image/png, image/jpeg" name="imgs" multiple></label> <br>  
                 <input class="submit" type="submit" value="Post">
                 
                 <label> &emsp; <%-prompt%> </label>

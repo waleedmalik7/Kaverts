@@ -3,7 +3,6 @@ const app = express()
 const http = require("http")
 const port = 81
 const { Pool } = require('pg')
-const ActiveTutor = require("./ps-classes.js")
 const { active } = require('requests')
 const pool = new Pool({
     user: 'ps_login',
@@ -14,15 +13,30 @@ const pool = new Pool({
 })
 app.use(express.urlencoded({ extended: true}))
 
+class ActiveTutors {
+    constructor(email, quals) {
+        this.email = email
+        this.quals = quals
+        this.questions = []
+    }
+}
+
 var activeTutors = {}
 
+class ActiveTutor {
+    constructor(email, quals) {
+        this.email = email
+        this.quals = quals
+        this.questions = []
+    }
+}
 /**
  * Student posts a question into the forum
  */
-app.post("/question", (req, res) => {
-    sqlInsert = `INSERT INTO question (student_id, prompt, subject, level, status) VALUES ((SELECT id FROM student WHERE email = $1),
-    $2,$3,$4,False)RETURNING id;`
-    sqlParams = [req.body.studentEmail, req.body.question, req.body.subject, req.body.level]
+app.post("/question", (req, res) => { 
+    sqlInsert = `INSERT INTO question (student_id, prompt, subject, level, status, img_path) VALUES ((SELECT id FROM student WHERE email = $1),
+    $2,$3,$4,False,$5::character varying[])RETURNING id;`
+    sqlParams = [req.body.studentEmail, req.body.question, req.body.subject, req.body.level, req.body.img_path]
     run_query(sqlInsert, sqlParams, (result) => {
         questionId = result.rows[0].id
         for (const [key, tutor] of Object.entries(activeTutors)) {
@@ -44,7 +58,7 @@ app.post("/question", (req, res) => {
  */
 app.get("/questions/:tutorEmail", (req, res) => {
     if (activeTutors[req.params.tutorEmail]) {
-        res.json([46])
+        res.json([60])
         // res.json(activeTutors[req.params.tutorEmail].questions)
     } else {
         res.sendStatus(404)
