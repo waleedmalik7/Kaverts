@@ -293,7 +293,8 @@ app.post("/", upload.any('imgs'), (req, res) => {
     if(req.session.user && !req.session.tutor) {
         img_path_string = "{"
         for (i=0; i < req.files.length; i++) {
-            img_path_string += req.files[i].path
+            img_path_string += req.files[i].filename
+            console.log(req.files[i])
             if (i+1 < req.files.length) {
                 img_path_string += ","
             }
