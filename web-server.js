@@ -145,8 +145,8 @@ app.post("/signup", async (req, res) => {
                     from: "kaverts.emailer@gmail.com",
                     to: email,
                     subject: 'Email Verification for Kaverts',
-                    html:  `<p> Hi, thank you for using our platform. Please follow the given link to verify your email  </p>
-                        <p> ` + `http://localhost:${port}/verify/${token}` + `</p>
+                    html:  `<p> Hi, thank you for using our platform. Please follow the given link to verify your email </p>
+                        <p> http://localhost:${port}/verify/${token} </p>
                         <p> Hope you enjoy! </p>`
                 };
                 // Send email to user
@@ -241,14 +241,14 @@ app.get("/verify/:token", async(req, res) => {
     })
 })
 
-//Serves landing page for student
+//Serves landing page for student and tutor
 app.get("/", async(req, res) => {
     if (req.session.user) {
         if (req.session.userActive) {
             if (req.session.tutor) {
-                res.render("tutor-home.ejs")
+                res.render("tutor/home.ejs")
             } else {
-                res.render("student-home.ejs", {
+                res.render("student/home.ejs", {
                     subjects: subjects,
                     academicLevels: academicLevels,
                     prompt: ""
@@ -273,7 +273,7 @@ app.get("/signout", async(req, res) => {
 app.get("/add-quals", async(req, res) => {
     if (req.session.user && req.session.tutor) {
         if (req.session.userActive) {
-            res.render("add-quals.ejs", {
+            res.render("tutor/add-quals.ejs", {
                 subjects: subjects,
                 academicLevels: academicLevels,
                 prompt: ""
@@ -315,14 +315,14 @@ app.post("/", upload.any('imgs'), (req, res) => {
             }).then((response) => {
                 res.sendStatus(200)
             }).catch((error) => {
-                res.render("student-home.ejs", {
+                res.render("student/home.ejs", {
                     subjects: subjects,
                     academicLevels: academicLevels,
                     prompt: "Sorry, there seem to be a problem. Please try again"
                 })
             });
         } else {
-            res.render("student-home.ejs", {
+            res.render("student/home.ejs", {
                 subjects: subjects,
                 academicLevels: academicLevels,
                 prompt: "Uh oh, seems like you missed a spot."
@@ -345,12 +345,12 @@ app.post("/tutor/active", async(req, res)=> {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {
-                res.redirect("/tutor-searching")
+                res.redirect("/tutor/searching")
             }).catch((error) => {
-                res.render("tutor-home.ejs")
+                res.render("tutor/home.ejs")
             });
         } else {
-            res.redirect("/tutor-searching")
+            res.redirect("/tutor/searching")
         }
     } 
 })
@@ -361,45 +361,14 @@ app.post("/add-quals", async(req, res)=> {
         if (req.session.userActive) {
             insertQuery = "INSERT INTO qualification VALUES ((SELECT id FROM tutor WHERE email = $1), $2, $3);"
             run_query(insertQuery, [req.session.user, req.body.subject, req.body.grade], async(result)=> {
-                res.render("add-quals.ejs", {
+                res.render("tutor/add-quals.ejs", {
                     subjects: subjects,
                     academicLevels: academicLevels,
                     prompt: "Qualification has been added. We are now verifying it."
                 })
             }, async(sqlError) =>{
                 if (sqlError.code == "23505") {
-                    res.render("add-quals.ejs", {
-                        subjects: subjects,
-                        academicLevels: academicLevels,
-                        prompt: "Uh oh, it seems like you have already added this qualification."
-                    })
-                } else {
-                    res.sendStatus(400)
-                }
-            })
-        } else {
-            res.render("wait-email-confirm.ejs", {
-                prevEmail: req.session.user
-            })
-        }
-    } else {
-        res.redirect("/login")
-    }
-})
-
-//Serves profile page
-app.get("/profile", async(req, res)=> {if (req.session.user && req.session.tutor) {
-    if (req.session.userActive) {
-        insertQuery = "INSERT INTO qualification VALUES ((SELECT id FROM tutor WHERE email = $1), $2, $3);"
-        run_query(insertQuery, [req.session.user, req.body.subject, req.body.grade], async(result)=> {
-            res.render("add-quals.ejs", {
-                subjects: subjects,
-                academicLevels: academicLevels,
-                prompt: "Qualification has been added. We are now verifying it."
-            })
-            }, async(sqlError) =>{
-                if (sqlError.code == "23505") {
-                    res.render("add-quals.ejs", {
+                    res.render("tutor/add-quals.ejs", {
                         subjects: subjects,
                         academicLevels: academicLevels,
                         prompt: "Uh oh, it seems like you have already added this qualification."
@@ -439,12 +408,12 @@ app.get("/tutor-searching", async(req, res)=> {
                     for (i=0; i<100; i++) {
                         test_result.push(result.rows[0])
                     }
-                    res.render("tutor-searching.ejs", {
+                    res.render("tutor/searching.ejs", {
                         data: test_result
                     })   
                 }) 
             }).catch((error) => {
-                res.render("tutor-home.ejs")
+                res.render("tutor/home.ejs")
             });
         }
     } else {
@@ -459,7 +428,7 @@ app.get("/pairing/:questionID", async(req, res)=> {
             sqlQuery = "SELECT id, prompt, subject, name, img_path FROM question INNER JOIN academic_level" +
                 " ON question.level = academic_level.level WHERE id = $1;"
             run_query(sqlQuery, [req.params.questionID], async(result)=>{
-                res.render("select-question.ejs", {
+                res.render("tutor/select-question.ejs", {
                     id: result.rows[0].id,
                     prompt: result.rows[0].prompt,
                     subject: result.rows[0].subject,
@@ -474,6 +443,24 @@ app.get("/pairing/:questionID", async(req, res)=> {
         }
     } else {
         res.redirect("/login")
+    }
+})
+
+//Serves the profile page for tutor and user
+app.get("/profile", async(req, res)=>{
+    if (req.session.user) {
+        if (req.session.tutor) {
+            run_query("SELECT * FROM qualification WHERE ")
+            res.render("tutor/profile.ejs", {
+                prompt: ""
+            })
+        } else {
+            res.render("student/profile.ejs", {
+                
+            })
+        }
+    } else {
+        res.redirect('/login')
     }
 })
 

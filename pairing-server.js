@@ -30,6 +30,7 @@ class ActiveTutor {
         this.questions = []
     }
 }
+
 /**
  * Student posts a question into the forum
  */
@@ -58,8 +59,7 @@ app.post("/question", (req, res) => {
  */
 app.get("/questions/:tutorEmail", (req, res) => {
     if (activeTutors[req.params.tutorEmail]) {
-        res.json([61])
-        // res.json(activeTutors[req.params.tutorEmail].questions)
+        res.json(activeTutors[req.params.tutorEmail].questions)
     } else {
         res.sendStatus(404)
     }
