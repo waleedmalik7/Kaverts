@@ -14,22 +14,43 @@
             <a href="/signout"> <button id="sign-out" > Sign Out </button></a>
             <a href="/profile"><button id="profile-button" > Profile </button></a>
         </header>
-        <div id="account-info">
-            <form id="pw-change" method = "POST" enctype ="multipart/form-data">
-                <div class="title-question">
-                    <h2>Change Password</h2>
-                </div>
-                <input name="old-pw" class="description" type="text">
-                <input name="new-pw" class="description" type="text">
-                <input name="confirm-new-pw" class="description" type="text">
-                <input class="submit" type="submit" value="Post">
-                <label> &emsp; <%-prompt%> </label>
-            </form>
-        </div>
-        <div id="add-qual">
-            
-        </div>
-        <div id="payment-info">
+        <div id=main-body>
+            <div class="main-subdiv">
+                <form id="pw-change" method = "POST" enctype ="multipart/form-data">
+                    <h2>Change Password</h2> 
+                    <label class="pw-input">Old Password: <input name="old-pw" type="password"></label>
+                    <label class="pw-input">New Password: <input name="new-pw" type="password"></label>
+                    <label class="pw-input">Confirm New Password: <input name="confirm-new-pw" type="password"></label>
+                    <input class="submit" type="submit" value="Change">
+                    <label> &emsp; <%-prompt%> </label>
+                </form>
+            </div>
+            <div class="main-subdiv">
+                <h2>Qualifications</h2> 
+                <table id=" table">
+                    <thead>
+                        <tr>
+                            <th class="subject-img-col"></th>
+                            <th>Subject</th>
+                            <th>Academic Level</th>
+                        </tr>
+                    </thead>
+                    <% for (var i = 0; i < quals.length; i++) { %> 
+                        <tr>
+                            <td class="subject-img-col"> <img width="25px" src = "../images/<%=quals[i].subject_name%>.png"></td>
+                            <td> <%=quals[i].subject_name%> </td>
+                            <td> <%=quals[i].name%> </td>
+                        </tr>
+                    <% } %>
+                </table>
+                <a href="/add-quals"><button class="submit" > Add </button></a>
+            </div>
+            <div class="main-subdiv">
+                <h2>Payment Info</h2> 
+            </div>
+            <div class="main-subdiv">
+                <h2>Question History</h2>
+            </div>
         </div>
         <footer>
             <p class="copyright">Copyright 2023 Kaverts &copy;</p>

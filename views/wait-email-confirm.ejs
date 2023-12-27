@@ -30,7 +30,9 @@
                 const urlSearchParams = new URLSearchParams();
 
                 // Add key-value pairs to the object
-                urlSearchParams.append("email", document.getElementById("email").value);
+                urlSearchParams.append("description", document.getElementByName("description").value);
+                urlSearchParams.append("subject", document.getElementByName("subject").value);
+                urlSearchParams.append("grade", document.getElementByName("grade").value);
                 
                 // Make an asynchronous POST request using Fetch
                 fetch("/resend", {

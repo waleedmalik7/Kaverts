@@ -11,11 +11,19 @@ const emailValidator = require('email-validator');
 const nodemailer = require('nodemailer');
 const axios = require('axios')
 const jwt = require('jsonwebtoken');
-const { run } = require('node:test');
 const psURL = 'http://localhost:81'
-const jwtKey = "vUL8qmXMqKwSSqUP_O_MRoYNd2taqRnumPc7UhgtX6jAjtgvsni02dbFEC7OlbMjyipUqQHpuzS9opSxZDTN9hiiPI3n_l7-Wo0dTysDLKtXndAvrsxTzkM0y9lk5mAoay9OT9jgJ54v0T8rtjVY4YwkctOO8bciVu_uvu_t_G0"
-const multer  = require('multer')
+
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config()
+}
+
+const stripe_pk = process.env.STRIPE_PUBLIC_KEY
+const stripe_sk = process.env.STRIPE_SECRET_KEY
+const jwtKey = process.env.JWT_KEY
+const multer  = require('multer') 
 const path = require('path');
+const stripe = require('stripe')(stripe_sk)
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/uploads/'); // Specify the directory where you want to save the files
@@ -251,7 +259,8 @@ app.get("/", async(req, res) => {
                 res.render("student/home.ejs", {
                     subjects: subjects,
                     academicLevels: academicLevels,
-                    prompt: ""
+                    prompt: "",
+                    stripePublicKey: stripe_pk
                 })
             }
         } else {
@@ -294,12 +303,12 @@ app.post("/", upload.any('imgs'), (req, res) => {
         img_path_string = "{"
         for (i=0; i < req.files.length; i++) {
             img_path_string += req.files[i].filename
-            console.log(req.files[i])
             if (i+1 < req.files.length) {
                 img_path_string += ","
             }
         }
         img_path_string += "}"
+        // Add send the question to the pairing server
         if (req.body.description, req.body.subject, req.body.grade) {
             const form = {
                 studentEmail: req.session.user,
@@ -313,19 +322,36 @@ app.post("/", upload.any('imgs'), (req, res) => {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {
-                res.sendStatus(200)
+                stripe.charges.create({
+                    amount: req.body.price,
+                    source: req.body.tokenID,
+                    currency: 'usd'
+                }).then(function(){
+                    res.sendStatus(200)
+                }).catch(function(error){
+                    console.log(error)
+                    res.render("student/home.ejs", {
+                        subjects: subjects,
+                        academicLevels: academicLevels,
+                        prompt: "Sorry, there was a problem processing your payment. Please try again",
+                        stripePublicKey: stripe_pk
+                    })
+                })
             }).catch((error) => {
+                console.log(error)
                 res.render("student/home.ejs", {
                     subjects: subjects,
                     academicLevels: academicLevels,
-                    prompt: "Sorry, there seem to be a problem. Please try again"
+                    prompt: "Sorry, there seem to be a problem. Please try again",
+                    stripePublicKey: stripe_pk
                 })
             });
         } else {
             res.render("student/home.ejs", {
                 subjects: subjects,
                 academicLevels: academicLevels,
-                prompt: "Uh oh, seems like you missed a spot."
+                prompt: "Uh oh, seems like you missed a spot.",
+                stripePublicKey: stripe_pk
             })
         }
     } else {
@@ -450,9 +476,13 @@ app.get("/pairing/:questionID", async(req, res)=> {
 app.get("/profile", async(req, res)=>{
     if (req.session.user) {
         if (req.session.tutor) {
-            run_query("SELECT * FROM qualification WHERE ")
-            res.render("tutor/profile.ejs", {
-                prompt: ""
+            selectQuery = "SELECT subject_name, name FROM qualification INNER JOIN academic_level" +
+            " ON qualification.subject_level = academic_level.level WHERE tutor_id = (SELECT id FROM tutor WHERE email = $1);"
+            run_query(selectQuery, [req.session.user], (result)=>{
+                res.render("tutor/profile.ejs", {
+                    prompt: "",
+                    quals: result.rows
+                })
             })
         } else {
             res.render("student/profile.ejs", {

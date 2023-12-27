@@ -49,18 +49,19 @@ body {
     margin: 0;
     min-width: 800px;
 }
-#question-form{
+#question-form-div{
     text-align: center;
     background: #cef2fd;
     min-width: 800px;
     padding: 20px;
     border-radius: 50px;
 }
+
 .title-question{
     font-family: 'Calibri';
     font-size: 40px;
 }
-.description{
+#question{
     display: block;
     width: 700px;
     margin: 12px auto;
@@ -72,7 +73,7 @@ body {
     font-family: 'Calibri';
 }
 
-.description:focus{
+#question:focus{
     outline: 1px dashed #3498db;
     transform: scale(1.03);
 }
@@ -93,6 +94,17 @@ body {
 
 .dropdown option{
     background-color: #cef2fd65;
+}
+
+#price {
+    width: 200px;
+    margin: 12px auto;
+    padding: 7px 20px;
+    border-radius: 20px;
+    font-size: 22px;
+    border: none;
+    outline: none;
+    font-family: 'Calibri';
 }
 
 .submit {

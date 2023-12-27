@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <title>Kaverts</title>
+        <meta name="viewport" content="width=device-width">
+        <meta charset="utf-8">
+        <link href="../../public/student-css/home.css" rel="stylesheet">
+        <link rel="icon" href="../images/Logo.png">
+        <script src="https://checkout.stripe.com/checkout.js"></script>
+        <script>
+            var stripePublicKey = 4242424
+        </script>
+        <script src="../../public/home.js"></script>
+        <link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
+    </head>
+
+    <body>
+        <header>
+            <a href = "/"> <button id="home-button" > Home </button></a>
+            <a href="/signout"> <button id="sign-out" > Sign Out </button></a>
+            <a href="/profile"><button id="profile-button" > Profile </button></a>
+        </header>
+        <div class="post-container">
+            <div id = "question-form-div">
+                <form id="question-form" method = "POST" enctype ="multipart/form-data">
+                    <div class="title-question">
+                        <h2>Post A Question</h2>
+                    </div>
+                    <input name="description" type="text" id="question" placeholder="Question">
+                    <div id="uploadArea" class="upload-area">
+                        <!-- Header -->
+                        <div class="upload-area__header">
+                          <h1 class="upload-area__title">Upload your file</h1>
+                          <p class="upload-area__paragraph">
+                            File should be an image
+                            <strong class="upload-area__tooltip">
+                              Like
+                              <span class="upload-area__tooltip-data"></span> <!-- Data Will be Comes From Js -->
+                            </strong>
+                          </p>
+                        </div>
+                        <!-- End Header -->
+                      
+                        <!-- Drop Zoon -->
+                        <div id="dropZoon" class="upload-area__drop-zoon drop-zoon">
+                          <span class="drop-zoon__icon">
+                            <i class='bx bxs-file-image'></i>
+                          </span>
+                          <p class="drop-zoon__paragraph">Drop your file here or Click to browse</p>
+                          <span id="loadingText" class="drop-zoon__loading-text">Please Wait</span>
+                          <img src="" alt="Preview Image" id="previewImage" class="drop-zoon__preview-image" draggable="false">
+                          <input type="file" id="fileInput" class="drop-zoon__file-input" accept="image/*">
+                        </div>
+                        <!-- End Drop Zoon -->
+                      
+                        <!-- File Details -->
+                        <div id="fileDetails" class="upload-area__file-details file-details">
+                          <h3 class="file-details__title">Uploaded File</h3>
+                      
+                          <div id="uploadedFile" class="uploaded-file">
+                            <div class="uploaded-file__icon-container">
+                              <i class='bx bxs-file-blank uploaded-file__icon'></i>
+                              <span class="uploaded-file__icon-text"></span> <!-- Data Will be Comes From Js -->
+                            </div>
+                      
+                            <div id="uploadedFileInfo" class="uploaded-file__info">
+                              <span class="uploaded-file__name">Proejct 1</span>
+                              <span class="uploaded-file__counter">0%</span>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- End File Details -->
+                      </div>
+                      <!-- End Upload Area -->
+                    <input name="price" type="text" id="price" placeholder="price">
+                    
+                </form>
+                <button onClick="purchaseClicked()" class="submit">POST</button> 
+                <label> &emsp; PROMPT </label>
+            </div>
+        </div>
+        <footer>
+            <p class="copyright">Copyright 2023 Kaverts &copy;</p>
+        </footer>
+    </body>
+    
+</html>

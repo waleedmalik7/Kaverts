@@ -1,0 +1,125 @@
+body {
+    margin: 0;
+    background-color: #cef2fd65;
+}
+
+#sign-out {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#home-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    position: absolute;
+    top: 5px;
+    left: 110px;
+    height: 30px;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+#profile-button {
+    font-family: 'Oswald', sans-serif;
+    background: black;
+    color: white ;
+    height: 30px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    margin: 0;
+}
+
+#main-body{
+    display: block;
+    justify-content: center;
+    align-items: center;
+    margin-top: 150px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 700px;
+}
+
+.main-subdiv{
+    font-size: 12px;
+    font-family: Arial;
+    font-weight: bold;
+    display: block;
+    border-bottom: 2px solid;
+    padding-bottom: 20px;
+}
+
+#pw-change{
+    display: flex;
+    flex-direction: column;
+}
+
+input[type="password"]{
+    display: block;
+    margin: 12px 5px;
+    padding: 7px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    font-family: 'Calibri';
+    width: 400px;
+}
+
+.submit {
+    margin-top: 20px;
+    width: 120px;
+    height: 30px;
+    background: #2e11d3;
+    color:#fff ;
+    font-size: 15px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: 'Calibri';
+}
+
+#qual-table th, td{
+    border-collapse: collapse;
+    padding: 8px;
+    border-bottom: 1px solid grey;
+}
+
+#qual-table tr:nth-of-type(even){
+    background-color: #e9e5e5;
+}
+
+#qual-table thead {
+    text-align: left;
+    background-color: black;
+    color: white;
+}
+
+#qual-table {
+    background-color: white;
+    border-collapse: collapse;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.subject-img-col {
+    width: 25px;
+}
+
+.copyright{
+    font-size: 12px;
+    font-family: Arial;
+    text-align: center;
+    font-weight: bold;
+    padding: 1px;
+}
