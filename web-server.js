@@ -242,7 +242,7 @@ app.get("/verify/:token", async(req, res) => {
                     req.session.user = decoded.data
                     req.session.userActive = true
                     req.session.tutor = true
-                    res.redirect("/tutor")
+                    res.redirect("/")
                 })
             }
         }
@@ -359,7 +359,7 @@ app.post("/", upload.any('imgs'), (req, res) => {
     }
 })
 
-// and makes tutor activ
+// and makes tutor active
 app.post("/tutor/active", async(req, res)=> {
     if (req.session.tutor) {
         if (!req.session.searching) {
@@ -371,12 +371,12 @@ app.post("/tutor/active", async(req, res)=> {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {
-                res.redirect("/tutor/searching")
+                res.redirect("/tutor-searching")
             }).catch((error) => {
                 res.render("tutor/home.ejs")
             });
         } else {
-            res.redirect("/tutor/searching")
+            res.redirect("/tutor-searching")
         }
     } 
 })
@@ -428,10 +428,9 @@ app.get("/tutor-searching", async(req, res)=> {
                     selectQuery += response.data[i] + ","
                 }
                 selectQuery += "-1);"
-
                 run_query(selectQuery, [], async(result)=> {
                     test_result = []
-                    for (i=0; i<100; i++) {
+                    for (i=0; i<Math.min(result.rows.length, 100); i++) {
                         test_result.push(result.rows[0])
                     }
                     res.render("tutor/searching.ejs", {
@@ -494,6 +493,35 @@ app.get("/profile", async(req, res)=>{
     }
 })
 
+//Post request to change pw
+app.post("/pw-change", async(req, res)=>{
+    if (checkPwFail(req.body.newPw)) {
+        res.sendStatus(404)
+        return
+    }
+    table = 'student'
+    if (req.session.tutor) {
+        table = 'tutor'
+    }
+    run_query("SELECT pw_hash FROM " + table + " WHERE email = $1;", [req.session.user], async(result)=>{
+        if (result.rows.length && await bycrypt.compare(req.body.oldPw, result.rows[0].pw_hash)) {
+             updateQuery = "UPDATE " + table + " SET pw_hash = $1 WHERE email = $2;"
+             run_query(updateQuery, [await bycrypt.hash(req.body.newPw, saltRounds), req.session.user], async(result)=>{
+                 res.send("Update successful.")
+             })
+        }
+    })
+})
+
+function checkPwFail(pw){
+    const password_digit = /(?=.*\d)/;
+    const password_cl = /(?=.*[A-Z])/;
+    const password_regex = /^[\w!@#$%^&*]{8,15}$/;
+    if (password_digit.test(pw) && password_cl.test(pw) && password_regex.test(pw)) { 
+        return true
+    } 
+    return false
+}
 // Asynchronously runs a Postgresql query
 async function run_query(query, params, callback, errHandle = (error)=> {console.log(error)}){ 
     try {

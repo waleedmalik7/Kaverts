@@ -16,11 +16,11 @@
         </header>
         <div id=main-body>
             <div class="main-subdiv">
-                <form id="pw-change" method = "POST" enctype ="multipart/form-data">
+                <form id="pw-change" method = "POST" action="pw-change">
                     <h2>Change Password</h2> 
-                    <label class="pw-input">Old Password: <input name="old-pw" type="password"></label>
-                    <label class="pw-input">New Password: <input name="new-pw" type="password"></label>
-                    <label class="pw-input">Confirm New Password: <input name="confirm-new-pw" type="password"></label>
+                    <label class="pw-input">Old Password: <input name="oldPw" type="password"></label>
+                    <label class="pw-input">New Password: <input name="newPw" type="password"></label>
+                    <label class="pw-input">Confirm New Password: <input name="confirmNewPw" type="password"></label>
                     <input class="submit" type="submit" value="Change">
                     <label> &emsp; <%-prompt%> </label>
                 </form>
