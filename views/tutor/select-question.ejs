@@ -14,7 +14,8 @@
             <a href="/signout"> <button id="sign-out" > Sign Out </button></a>
             <a href="/profile"><button id="profile-button" > Profile </button></a>
         </header>
-        <form action="/" method="POST" id="meta-data">
+        <form action="/tutor-room" method="POST" id="meta-data">
+            <input type="hidden" name="id" value="<%=id%>">
             <label id="question-info"><%=subject%>: <%=grade%></label>
             <input class="submit" type="submit" value="ANSWER">
         </form>

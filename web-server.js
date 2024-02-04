@@ -1,4 +1,5 @@
 const express = require('express')
+const socketIO = require('socket.io')
 const app = express()
 const ejs = require('ejs');
 const http = require("http")
@@ -12,6 +13,37 @@ const nodemailer = require('nodemailer');
 const axios = require('axios')
 const jwt = require('jsonwebtoken');
 const psURL = 'http://localhost:81'
+const users = {};
+
+const server = http.createServer(app).listen(port, () => {
+    console.log("listening on port: " + port)  
+})
+
+//LiveChat Server
+const io = socketIO(server); //io is the websocket server
+
+io.on('connection', (socket)=>{ //creates channel called socket
+    console.log('A user connected');
+
+    socket.on('new-user', ({name, room})=>{
+        socket.join(room);
+        users[socket.id] = {name, room};
+        socket.to(room).emit('user-connected', name);
+    });
+
+    socket.on('chat-message', (msg) =>{ //adds chat message event listner to channel
+        sender = users[socket.id];
+        data = {message: msg, sender: sender.name}
+        socket.to(sender.room).emit('send-message', data); //websocket server sends the message to all clients
+    });
+
+    socket.on('disconnect', ()=>{
+        console.log('User disconnected');
+        user = users[socket.id];
+        socket.to(user.room).emit('user-disconnected',user.name);
+        delete users[socket.id];
+    });
+});
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
@@ -327,7 +359,7 @@ app.post("/", upload.any('imgs'), (req, res) => {
                     source: req.body.tokenID,
                     currency: 'usd'
                 }).then(function(){
-                    res.sendStatus(200)
+                    res.render("livechat.ejs",{roomNumber: response.data});
                 }).catch(function(error){
                     console.log(error)
                     res.render("student/home.ejs", {
@@ -431,7 +463,7 @@ app.get("/tutor-searching", async(req, res)=> {
                 run_query(selectQuery, [], async(result)=> {
                     test_result = []
                     for (i=0; i<Math.min(result.rows.length, 100); i++) {
-                        test_result.push(result.rows[0])
+                        test_result.push(result.rows[i])
                     }
                     res.render("tutor/searching.ejs", {
                         data: test_result
@@ -469,6 +501,12 @@ app.get("/pairing/:questionID", async(req, res)=> {
     } else {
         res.redirect("/login")
     }
+})
+
+app.post("/tutor-room", async(req, res)=> {
+    const id = req.body.id;
+    console.log(id);
+    res.render("livechat.ejs",{roomNumber: id});
 })
 
 //Serves the profile page for tutor and user
@@ -531,7 +569,3 @@ async function run_query(query, params, callback, errHandle = (error)=> {console
         errHandle(error)
     }
 }
-
-http.createServer(app).listen(port, () => {
-    console.log("listening on port: " + port)  
-})

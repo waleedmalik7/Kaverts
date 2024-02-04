@@ -47,7 +47,7 @@ app.post("/question", (req, res) => {
                 }
             }
         }
-        res.sendStatus(200)
+        res.send(result.rows[0].id);
     }, (err)=> {
         console.log(err)
         res.sendStatus(404)
