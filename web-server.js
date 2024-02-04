@@ -359,7 +359,7 @@ app.post("/", upload.any('imgs'), (req, res) => {
                     source: req.body.tokenID,
                     currency: 'usd'
                 }).then(function(){
-                    res.sendStatus(200)
+                    res.render("livechat.ejs",{roomNumber: response.data});
                 }).catch(function(error){
                     console.log(error)
                     res.render("student/home.ejs", {
@@ -390,6 +390,7 @@ app.post("/", upload.any('imgs'), (req, res) => {
         res.redirect("/login")
     }
 })
+
 
 // and makes tutor active
 app.post("/tutor/active", async(req, res)=> {
