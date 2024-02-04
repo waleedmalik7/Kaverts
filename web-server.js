@@ -1,4 +1,5 @@
 const express = require('express')
+const socketIO = require('socket.io')
 const app = express()
 const ejs = require('ejs');
 const http = require("http")
@@ -12,6 +13,37 @@ const nodemailer = require('nodemailer');
 const axios = require('axios')
 const jwt = require('jsonwebtoken');
 const psURL = 'http://localhost:81'
+const users = {};
+
+const server = http.createServer(app).listen(port, () => {
+    console.log("listening on port: " + port)  
+})
+
+//LiveChat Server
+const io = socketIO(server); //io is the websocket server
+
+io.on('connection', (socket)=>{ //creates channel called socket
+    console.log('A user connected');
+
+    socket.on('new-user', ({name, room})=>{
+        socket.join(room);
+        users[socket.id] = {name, room};
+        socket.to(room).emit('user-connected', name);
+    });
+
+    socket.on('chat-message', (msg) =>{ //adds chat message event listner to channel
+        sender = users[socket.id];
+        data = {message: msg, sender: sender.name}
+        socket.to(sender.room).emit('send-message', data); //websocket server sends the message to all clients
+    });
+
+    socket.on('disconnect', ()=>{
+        console.log('User disconnected');
+        user = users[socket.id];
+        socket.to(user.room).emit('user-disconnected',user.name);
+        delete users[socket.id];
+    });
+});
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
@@ -310,28 +342,25 @@ app.post("/", upload.any('imgs'), (req, res) => {
         img_path_string += "}"
         //If all fields filled, then process payment and send question to pairing server
         if (req.body.description, req.body.subject, req.body.grade) {
-            //Process payment
-            stripe.charges.create({
-                amount: req.body.price,
-                source: req.body.tokenID,
-                currency: 'usd'
-            }).then(function(){
-                //create post to pairing server to make question
-                const form = {
-                    studentEmail: req.session.user,
-                    question: req.body.description,
-                    subject: req.body.subject,
-                    level: req.body.grade,
-                    img_path: img_path_string
-                }
-                
-                axios.post(psURL + '/question', form, {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                }).then((response) => {
+            const form = {
+                studentEmail: req.session.user,
+                question: req.body.description,
+                subject: req.body.subject,
+                level: req.body.grade,
+                img_path: img_path_string
+            }
+            axios.post(psURL + '/question', form, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }).then((response) => {
+                stripe.charges.create({
+                    amount: req.body.price,
+                    source: req.body.tokenID,
+                    currency: 'usd'
+                }).then(function(){
                     res.sendStatus(200)
-                }).catch((error) => {
+                }).catch(function(error){
                     console.log(error)
                     res.render("student/home.ejs", {
                         subjects: subjects,
@@ -474,6 +503,12 @@ app.get("/pairing/:questionID", async(req, res)=> {
     }
 })
 
+app.post("/tutor-room", async(req, res)=> {
+    const id = req.body.id;
+    console.log(id);
+    res.render("livechat.ejs",{roomNumber: id});
+})
+
 //Serves the profile page for tutor and user
 app.get("/profile", async(req, res)=>{
     if (req.session.user) {
@@ -534,7 +569,3 @@ async function run_query(query, params, callback, errHandle = (error)=> {console
         errHandle(error)
     }
 }
-
-http.createServer(app).listen(port, () => {
-    console.log("listening on port: " + port)  
-})
