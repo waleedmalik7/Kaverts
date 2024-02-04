@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <title>Kaverts</title>
+        <meta name="viewport" content="width=device-width">
+        <meta charset="utf-8">
+        <link href="../tutor-css/profile.css" rel="stylesheet">
+        <link rel="icon" href="../images/Logo.png">
+    </head>
+
+    <body>
+        <header>
+            <a href = "/"> <button id="home-button" > Home </button></a>
+            <a href="/signout"> <button id="sign-out" > Sign Out </button></a>
+            <a href="/profile"><button id="profile-button" > Profile </button></a>
+        </header>
+        <div id=main-body>
+            <div class="main-subdiv">
+                <form id="pw-change" method = "POST" action="pw-change">
+                    <h2>Change Password</h2> 
+                    <label class="pw-input">Old Password: <input name="oldPw" type="password"></label>
+                    <label class="pw-input">New Password: <input name="newPw" type="password"></label>
+                    <label class="pw-input">Confirm New Password: <input name="confirmNewPw" type="password"></label>
+                    <input class="submit" type="submit" value="Change">
+                    <label> &emsp; <%-prompt%> </label>
+                </form>
+            </div>
+            <div class="main-subdiv">
+            <div class="main-subdiv">
+                <h2>Payment Info</h2> 
+            </div>
+            <div class="main-subdiv">
+                <h2>Question History</h2>
+            </div>
+        </div>
+        <footer>
+            <p class="copyright">Copyright 2023 Kaverts &copy;</p>
+        </footer>
+    </body>
+    
+</html>

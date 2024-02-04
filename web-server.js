@@ -308,44 +308,47 @@ app.post("/", upload.any('imgs'), (req, res) => {
             }
         }
         img_path_string += "}"
-        // Add send the question to the pairing server
+        //If all fields filled, then process payment and send question to pairing server
         if (req.body.description, req.body.subject, req.body.grade) {
-            const form = {
-                studentEmail: req.session.user,
-                question: req.body.description,
-                subject: req.body.subject,
-                level: req.body.grade,
-                img_path: img_path_string
-            }
-            axios.post(psURL + '/question', form, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-            }).then((response) => {
-                stripe.charges.create({
-                    amount: req.body.price,
-                    source: req.body.tokenID,
-                    currency: 'usd'
-                }).then(function(){
+            //Process payment
+            stripe.charges.create({
+                amount: req.body.price,
+                source: req.body.tokenID,
+                currency: 'usd'
+            }).then(function(){
+                //create post to pairing server to make question
+                const form = {
+                    studentEmail: req.session.user,
+                    question: req.body.description,
+                    subject: req.body.subject,
+                    level: req.body.grade,
+                    img_path: img_path_string
+                }
+                
+                axios.post(psURL + '/question', form, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                }).then((response) => {
                     res.sendStatus(200)
-                }).catch(function(error){
+                }).catch((error) => {
                     console.log(error)
                     res.render("student/home.ejs", {
                         subjects: subjects,
                         academicLevels: academicLevels,
-                        prompt: "Sorry, there was a problem processing your payment. Please try again",
+                        prompt: "Sorry, there seem to be a problem. Please try again",
                         stripePublicKey: stripe_pk
                     })
-                })
-            }).catch((error) => {
+                });
+            }).catch(function(error){
                 console.log(error)
                 res.render("student/home.ejs", {
                     subjects: subjects,
                     academicLevels: academicLevels,
-                    prompt: "Sorry, there seem to be a problem. Please try again",
+                    prompt: "Sorry, there was a problem processing your payment. Please try again",
                     stripePublicKey: stripe_pk
                 })
-            });
+            })
         } else {
             res.render("student/home.ejs", {
                 subjects: subjects,
@@ -431,7 +434,7 @@ app.get("/tutor-searching", async(req, res)=> {
                 run_query(selectQuery, [], async(result)=> {
                     test_result = []
                     for (i=0; i<Math.min(result.rows.length, 100); i++) {
-                        test_result.push(result.rows[0])
+                        test_result.push(result.rows[i])
                     }
                     res.render("tutor/searching.ejs", {
                         data: test_result
@@ -485,7 +488,7 @@ app.get("/profile", async(req, res)=>{
             })
         } else {
             res.render("student/profile.ejs", {
-                
+                prompt: ""
             })
         }
     } else {
